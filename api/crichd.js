@@ -1,33 +1,29 @@
 const https = require('https');
 const http = require('http');
 
-const BASE_URL = 'https://crichd.top';
-const PLAYERADO_URL = 'https://playerado.top';
-const BHALOCAST_URL = 'https://bhalocast.com';
-const SRHADY_REPO = 'https://raw.githubusercontent.com/srhady/crichd-speical-live-event/main';
-const CRICKET_LIVE = 'https://raw.githubusercontent.com/srhady/CricketLive/main';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0';
+const C_TOP = 'https://crichd.top';
+const P_ADO = 'https://playerado.top';
+const B_CAST = 'https://bhalocast.com';
+const EX_SHIP = 'https://executeandship.com';
+const S_LIVE = 'https://raw.githubusercontent.com/srhady/crichd-speical-live-event/main';
+const C_LIVE = 'https://raw.githubusercontent.com/srhady/CricketLive/main';
 
-const cache = { matches: null, matchTime: 0, srhadyEvents: null, srhadyTime: 0, streamCache: {} };
-const TTL = 30000;
-const STREAM_TTL = 120000;
+const cache = { matches: null, tM: 0, srhadyEv: null, tS: 0, strCache: {} };
+const TTL = 30000, STTL = 120000;
 
-function httpFetch(url, opts = {}) {
+function fetch(url, opts = {}) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
     const mod = u.protocol === 'https:' ? https : http;
     const req = mod.request({
-      hostname: u.hostname, port: u.port || 443,
-      path: u.pathname + u.search, method: opts.method || 'GET',
-      headers: {
-        'User-Agent': UA, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5',
-        ...(opts.headers || {}),
-      },
+      hostname: u.hostname, port: u.port || 443, path: u.pathname + u.search,
+      method: opts.method || 'GET',
+      headers: { 'User-Agent': UA, 'Accept': '*/*', ...(opts.headers || {}) },
       timeout: opts.timeout || 15000,
     }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        httpFetch(res.headers.location, opts).then(resolve).catch(reject);
-        return;
+        return fetch(res.headers.location, opts).then(resolve).catch(reject);
       }
       const chunks = [];
       res.on('data', c => chunks.push(c));
@@ -40,238 +36,244 @@ function httpFetch(url, opts = {}) {
   });
 }
 
-// ── Match Scraping ──
+function extractChars(data) {
+  const m = data.match(/return\s*\(\[([\s\S]*?)\]\.join/);
+  if (!m) return null;
+  const parts = m[1].match(/"([^"]*)"/g);
+  if (!parts) return null;
+  return parts.map(p => p.replace(/"/g, '')).join('').replace(/\\\//g, '/');
+}
+
+/* ── Match scraping ── */
 async function scrapeMatches() {
-  if (cache.matches && Date.now() - cache.matchTime < TTL) return cache.matches;
-  const { text: html } = await httpFetch(BASE_URL + '/');
+  if (cache.matches && Date.now() - cache.tM < TTL) return cache.matches;
+  const { text: html } = await fetch(C_TOP + '/');
   const matches = [];
-  const rows = html.split(/<tr[\s>]/);
-  for (const row of rows) {
+  for (const row of html.split(/<tr[\s>]/)) {
     if (!row.includes('gametitle')) continue;
-    const leagueMatch = row.match(/rel="tag">([^<]+)</);
-    const league = leagueMatch ? leagueMatch[1].trim() : 'Cricket';
-    const urlMatch = row.match(/<a\s+href="(https?:\/\/[^"]+)"[^>]*itemprop="url">[\s\S]*?<h2\s+class="gametitle"[^>]*>([^<]+)</);
-    if (!urlMatch) continue;
-    const matchUrl = urlMatch[1], title = urlMatch[2].trim();
-    const timeMatch = row.match(/<span\s+class="dt">([^<]+)</);
-    const time = timeMatch ? timeMatch[1].trim() : '';
-    const dayMatch = row.match(/<small\s+class="post-day"[^>]*>([^<]*)/);
-    let day = dayMatch ? dayMatch[1].replace(/&nbsp;/g, '').trim() : '';
+    const league = (row.match(/rel="tag">([^<]+)</) || [])[1] || 'Cricket';
+    const mu = row.match(/<a\s+href="(https?:\/\/[^"]+)"[^>]*itemprop="url">[\s\S]*?<h2\s+class="gametitle"[^>]*>([^<]+)</);
+    if (!mu) continue;
+    const url = mu[1], title = mu[2].trim();
+    const time = (row.match(/<span\s+class="dt">([^<]+)</) || [])[1] || '';
+    let day = (row.match(/<small\s+class="post-day"[^>]*>([^<]*)/) || [])[1] || '';
+    day = day.replace(/&nbsp;/g, '').trim();
     if (day.includes('Today')) day = 'Today';
     else if (day.includes('Tomorrow')) day = 'Tomorrow';
     const isLive = row.includes('class="liveg');
-    const watchMatch = row.match(/<td\s+class="mobile-hide">\s*<a\s+href="(https?:\/\/[^"]+)"[^>]*>Watch/);
-    const pageUrl = watchMatch ? watchMatch[1] : matchUrl;
-    matches.push({ id: new URL(matchUrl).pathname, title, league, url: matchUrl, pageUrl, time, day, isLive });
+    const wm = row.match(/<td\s+class="mobile-hide">\s*<a\s+href="(https?:\/\/[^"]+)"[^>]*>Watch/);
+    matches.push({ id: new URL(url).pathname, title, league, url, pageUrl: wm ? wm[1] : url, time, day, isLive });
   }
-  cache.matches = matches;
-  cache.matchTime = Date.now();
+  cache.matches = matches; cache.tM = Date.now();
   return matches;
 }
 
-// ── Server Scraping ──
+/* ── Server scraping ── */
 async function scrapeServers(matchUrl) {
-  const { text: html } = await httpFetch(matchUrl);
-  const servers = [];
-  const seen = new Set();
-  const add = (name, url) => { if (url && !seen.has(url)) { seen.add(url); servers.push({ name, url }); } };
+  const { text: html } = await fetch(matchUrl);
+  const servers = [], seen = new Set();
+  const add = (n, u) => { if (u && !seen.has(u)) { seen.add(u); servers.push({ name: n, url: u }); } };
   let m;
-  const re1 = /<a[^>]+href="(https?:\/\/dadocric\.st\/player\.php\?id=[^"]+)"[^>]*>([^<]*)<\/a>/gi;
-  while ((m = re1.exec(html)) !== null) add(m[2].trim() || `Server ${servers.length+1}`, m[1]);
-  const re2 = /<iframe[^>]+src=["'](https?:\/\/[^"']+)["']/gi;
-  while ((m = re2.exec(html)) !== null) { if (!m[1].includes('chat') && !m[1].includes('histats')) add(`Embed ${servers.length+1}`, m[1]); }
-  const re3 = /<a[^>]+href="(https?:\/\/(?!#)[^"]+)"[^>]*>([^<]*(?:player|server|stream|watch|hd|link)[^<]*)<\/a>/gi;
-  while ((m = re3.exec(html)) !== null) { const n = m[2].trim(); if (n.length > 2 && n.length < 50) add(n, m[1]); }
+  const r1 = /<a[^>]+href="(https?:\/\/dadocric\.st\/player\.php\?id=[^"]+)"[^>]*>([^<]*)<\/a>/gi;
+  while ((m = r1.exec(html)) !== null) add(m[2].trim() || `S${servers.length+1}`, m[1]);
+  const r2 = /<iframe[^>]+src=["'](https?:\/\/[^"']+)["']/gi;
+  while ((m = r2.exec(html)) !== null) { if (!m[1].includes('chat')) add(`E${servers.length+1}`, m[1]); }
+  const r3 = /<a[^>]+href="(https?:\/\/(?!#)[^"]+)"[^>]*>([^<]*(?:player|server|stream|watch|hd|link)[^<]*)<\/a>/gi;
+  while ((m = r3.exec(html)) !== null) { const n = m[2].trim(); if (n.length > 2 && n.length < 50) add(n, m[1]); }
   return servers;
 }
 
-// ── srhady Data ──
-async function fetchSrhadyEvents() {
-  if (cache.srhadyEvents && Date.now() - cache.srhadyTime < TTL) return cache.srhadyEvents;
-  try {
-    const { text } = await httpFetch(`${SRHADY_REPO}/Live_Events.json`);
-    cache.srhadyEvents = JSON.parse(text).matches || [];
-    cache.srhadyTime = Date.now();
-  } catch { cache.srhadyEvents = []; }
-  return cache.srhadyEvents;
+/* ── srhady data ── */
+async function getSrhadyEv() {
+  if (cache.srhadyEv && Date.now() - cache.tS < TTL) return cache.srhadyEv;
+  try { const { text } = await fetch(`${S_LIVE}/Live_Events.json`); cache.srhadyEv = JSON.parse(text).matches || []; cache.tS = Date.now(); } catch { cache.srhadyEv = []; }
+  return cache.srhadyEv;
 }
-
-async function fetchSrhadyChannels() {
+async function getSrhadyCh() {
   try {
-    const { text: m3u } = await httpFetch(`${SRHADY_REPO}/playlist.m3u`);
-    const channels = [];
-    let cur = {};
-    for (const line of m3u.split('\n')) {
-      const t = line.trim();
+    const { text: m3u } = await fetch(`${S_LIVE}/playlist.m3u`);
+    const ch = []; let cur = {};
+    for (const l of m3u.split('\n')) {
+      const t = l.trim();
       if (t.startsWith('#EXTINF:')) {
-        cur = {
-          name: t.replace(/.*?,[\s]*(.*)/, '$1').trim(),
-          logo: (t.match(/tvg-logo="([^"]*)"/) || [])[1] || '',
-          group: (t.match(/group-title="([^"]*)"/) || [])[1] || '',
-        };
+        cur = { name: t.replace(/.*?,[\s]*(.*)/, '$1').trim(), logo: (t.match(/tvg-logo="([^"]*)"/) || [])[1] || '', group: (t.match(/group-title="([^"]*)"/) || [])[1] || '' };
       } else if (t.startsWith('#EXTVLCOPT:')) {
-        const val = t.replace('#EXTVLCOPT:', '');
-        if (val.startsWith('http-referrer=')) cur.referer = val.replace('http-referrer=', '');
-      } else if (t && !t.startsWith('#') && cur.name) {
-        cur.url = t;
-        channels.push({ ...cur });
-        cur = {};
-      }
+        const v = t.replace('#EXTVLCOPT:', '');
+        if (v.startsWith('http-referrer=')) cur.referer = v.replace('http-referrer=', '');
+      } else if (t && !t.startsWith('#') && cur.name) { cur.url = t; ch.push({ ...cur }); cur = {}; }
     }
-    return channels;
+    return ch;
   } catch { return []; }
 }
 
-// ── Extract FID from embed2.php ──
-async function extractFid(serverUrl) {
-  let iframeUrl = serverUrl;
+/* ── FID extraction ── */
+async function getFid(serverUrl) {
+  let ifUrl = serverUrl;
   if (serverUrl.includes('dadocric.st')) {
-    const { text } = await httpFetch(serverUrl, { headers: { Referer: BASE_URL + '/' } });
+    const { text } = await fetch(serverUrl, { headers: { Referer: C_TOP + '/' } });
     const m = text.match(/iframe[^>]+src=["'](https?:\/\/[^"']+)["']/i);
-    if (m) iframeUrl = m[1];
+    if (m) ifUrl = m[1];
   }
-  const { text } = await httpFetch(iframeUrl, { headers: { Referer: serverUrl } });
-  const fid = (text.match(/fid="([^"]*)"/) || [])[1];
-  const v_con = (text.match(/v_con=["'](.*?)["']/) || [])[1] || '';
-  const v_dt = (text.match(/v_dt=["'](.*?)["']/) || [])[1] || '';
-  return { fid, v_con, v_dt, iframeUrl };
+  const { text } = await fetch(ifUrl, { headers: { Referer: serverUrl } });
+  return {
+    fid: (text.match(/fid="([^"]*)"/) || [])[1],
+    v_con: (text.match(/v_con=["'](.*?)["']/) || [])[1] || '',
+    v_dt: (text.match(/v_dt=["'](.*?)["']/) || [])[1] || '',
+    ifUrl,
+    serverUrl,
+  };
 }
 
-// ── Try pzo.php extraction (from CloudStream 3 approach) ──
-async function tryPzoExtract(fid, v_con, v_dt) {
-  const url = `${BHALOCAST_URL}/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt || '123456'}`;
+/* ── Stream extraction methods ── */
+
+/* Method 1: executeandship.com premiumcr.php (from siam3310's scraper) */
+async function m1_execShip(fid) {
   try {
-    const { text } = await httpFetch(url, { headers: { Referer: PLAYERADO_URL + '/' }, timeout: 10000 });
-    // pzo.php returns HTML with decoded m3u8 URL or redirect
-    const m3u8 = text.match(/["'](https?:\/\/[^"']*?bhalocast[^"']*?m3u8[^"']*?)["']/);
-    if (m3u8) return { url: m3u8[1].replace(/\\\//g, '/'), method: 'pzo' };
-    // Sometimes returns a JavaScript redirect with the URL
-    const jsUrl = text.match(/["'](https?:\/\/[^"']+\.m3u8[^"']*?)["']/);
-    if (jsUrl) return { url: jsUrl[1].replace(/\\\//g, '/'), method: 'pzo' };
-    // Try to extract from embedded redirect
-    const loc = text.match(/location\.href\s*=\s*["']([^"']+)["']/);
-    if (loc) {
-      const { text: locText } = await httpFetch(loc[1], { headers: { Referer: url }, timeout: 10000 });
-      const m2 = locText.match(/["'](https?:\/\/[^"']*?bhalocast[^"']*?m3u8[^"']*?)["']/);
-      if (m2) return { url: m2[1].replace(/\\\//g, '/'), method: 'pzo' };
-    }
+    const url = `${EX_SHIP}/premiumcr.php?player=desktop&live=${fid}`;
+    const { text } = await fetch(url, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+    const m3u8 = extractChars(text);
+    if (m3u8 && m3u8.includes('.m3u8')) return { url: m3u8, method: 'exec-ship' };
   } catch {}
   return null;
 }
 
-// ── Try playergo1.php fallback ──
-async function tryPlayerGo(fid, v_con, v_dt) {
-  const url = `https://bhalocast.pro/playergo1.php?v=${fid}&secure=${v_con}&expires=${v_dt || '123456'}`;
+/* Method 2: Try executeandship.com with warmup (fetch premium.js first) */
+async function m2_execShipWarm(fid) {
   try {
-    const { text } = await httpFetch(url, { headers: { Referer: PLAYERADO_URL + '/' }, timeout: 10000 });
-    const m = text.match(/["'](https?:\/\/[^"']*?m3u8[^"']*?)["']/);
-    if (m) return { url: m[1].replace(/\\\//g, '/'), method: 'playergo1' };
+    await fetch(`https:${EX_SHIP}/premium.js`, { headers: { Referer: EX_SHIP + '/' }, timeout: 8000 });
+    const url = `${EX_SHIP}/premiumcr.php?player=desktop&live=${fid}`;
+    const { text } = await fetch(url, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+    const m3u8 = extractChars(text);
+    if (m3u8 && m3u8.includes('.m3u8')) return { url: m3u8, method: 'exec-ship-warm' };
   } catch {}
   return null;
 }
 
-// ── Try direct CDN via srhady match title matching ──
-async function trySrhadyDirect(title, events) {
-  const t = title.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-  // Look through Live_Events.json for matching title
+/* Method 3: pzo.php */
+async function m3_pzo(fid, v_con, v_dt) {
+  try {
+    const url = `${B_CAST}/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt || '123456'}`;
+    const { text } = await fetch(url, { headers: { Referer: P_ADO + '/' }, timeout: 10000 });
+    const m3u8 = extractChars(text) || (text.match(/["'](https?:\/\/[^"']*?bhalocast[^"']*?m3u8[^"']*?)["']/) || [])[1];
+    if (m3u8) return { url: (typeof m3u8 === 'string' ? m3u8 : m3u8[1]).replace(/\\\//g, '/'), method: 'pzo' };
+  } catch {}
+  return null;
+}
+
+/* Method 4: news123.php */
+async function m4_news123(fid) {
+  try {
+    const url = `${B_CAST}/news123.php?v=${fid}`;
+    const { text } = await fetch(url, { headers: { Referer: P_ADO + '/' }, timeout: 10000 });
+    const m3u8 = (text.match(/["'](https?:\/\/[^"']*?bhalocast[^"']*?m3u8[^"']*?)["']/) || [])[1];
+    if (m3u8) return { url: m3u8.replace(/\\\//g, '/'), method: 'news123' };
+  } catch {}
+  return null;
+}
+
+/* Method 5: playergo1.php */
+async function m5_playergo1(fid, v_con, v_dt) {
+  try {
+    const url = `https://bhalocast.pro/playergo1.php?v=${fid}&secure=${v_con}&expires=${v_dt || '123456'}`;
+    const { text } = await fetch(url, { headers: { Referer: P_ADO + '/' }, timeout: 10000 });
+    const m3u8 = extractChars(text) || (text.match(/["'](https?:\/\/[^"']*?m3u8[^"']*?)["']/) || [])[1];
+    if (m3u8) return { url: (typeof m3u8 === 'string' ? m3u8 : m3u8[1]).replace(/\\\//g, '/'), method: 'playergo1' };
+  } catch {}
+  return null;
+}
+
+/* Method 6: srhady CDN direct (zohanayaan CDN) — match by fid as channel_id */
+async function m6_srhadyCdn(fid, events) {
   for (const ev of events) {
-    const et = (ev.title || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-    if (!et) continue;
-    // Match if one contains the other or similar
-    const tParts = t.split(/\s+/).filter(s => s.length > 2);
-    const etParts = et.split(/\s+/).filter(s => s.length > 2);
-    const common = tParts.filter(p => etParts.includes(p));
-    if (common.length >= Math.min(2, tParts.length, etParts.length)) {
-      // Found a match — try to find direct CDN URL
-      if (ev.cdn_url || ev.m3u8) return { url: ev.cdn_url || ev.m3u8, method: 'srhady-event' };
-      if (ev.embed && ev.embed.includes('embed2.php')) {
-        const id = ev.embed.match(/id=([^&]+)/);
-        if (id) {
-          // Construct zohanayaan CDN URL from channel ID pattern
-          const channelMatch = (ev.channel_id || ev.channel || id[1]).match(/(\d+)/);
-          if (channelMatch) {
-            const ch = channelMatch[1];
-            const cdnUrl = `https://zohanayaan.com:1686/live/${ch}.m3u8?md5=${Date.now()}&token=1`;
-            return { url: cdnUrl, method: 'srhady-cdn', referer: 'https://teachtrendhub.com/' };
-          }
-        }
-      }
+    const evId = (ev.embed || '').match(/id=([^&]+)/);
+    if (evId && evId[1] === fid) {
+      const ch = (ev.channel_id || '').match(/(\d+)/);
+      if (ch) return { url: `https://zohanayaan.com:1686/live/${ch[1]}.m3u8`, method: 'srhady-cdn', referer: 'https://teachtrendhub.com/' };
     }
   }
   return null;
 }
 
-// ── Try to fetch from CricketLive repo ──
-async function tryCricketLive(title) {
-  // srhady/CricketLive repo has files named by match with .m3u8 extension
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  try {
-    const { text } = await httpFetch(`https://raw.githubusercontent.com/srhady/CricketLive/main/${slug}.m3u8`, { timeout: 5000 });
-    if (text && text.includes('.m3u8') || text.includes('#EXTM3U')) {
-      const firstLine = text.split('\n').find(l => l.trim() && !l.startsWith('#'));
-      if (firstLine) return { url: firstLine.trim(), method: 'cricket-live' };
-    }
-  } catch {}
-  // Try some common variations
-  for (const prefix of ['', 'live-', 'stream-']) {
+/* Method 7: Try alternative base URLs */
+async function m7_altEndpoints(fid) {
+  const tries = [
+    { url: `https://streamcrichd.com/update/willowcricket.php`, ref: 'https://streamcrichd.com/', label: 'streamcrichd' },
+  ];
+  for (const t of tries) {
     try {
-      const { text } = await httpFetch(`https://raw.githubusercontent.com/srhady/CricketLive/main/${prefix}${slug}.m3u8`, { timeout: 5000 });
-      if (text) {
-        const firstLine = text.split('\n').find(l => l.trim() && !l.startsWith('#'));
-        if (firstLine && firstLine.includes('.m3u8')) return { url: firstLine.trim(), method: 'cricket-live' };
+      const { text } = await fetch(t.url, { headers: { Referer: t.ref }, timeout: 8000 });
+      const f2 = (text.match(/fid=(["\'])([^"\']+)\1/) || [])[2];
+      if (f2) {
+        const { text: pText } = await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${f2}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+        const m3u8 = extractChars(pText);
+        if (m3u8 && m3u8.includes('.m3u8')) return { url: m3u8, method: t.label };
       }
     } catch {}
   }
   return null;
 }
 
-// ── Main stream extraction with fallback chain ──
-async function extractStream(serverUrl) {
-  const cacheKey = serverUrl;
-  if (cache.streamCache[cacheKey] && Date.now() - cache.streamCache[cacheKey].time < STREAM_TTL) {
-    return cache.streamCache[cacheKey].result;
+/* Method 8: CricketLive repo direct lookup */
+async function m8_cricketLive(title) {
+  if (!title) return null;
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  for (const pre of ['', 'live-', 'stream-']) {
+    try {
+      const { text } = await fetch(`https://raw.githubusercontent.com/srhady/CricketLive/main/${pre}${slug}.m3u8`, { timeout: 5000 });
+      if (text) {
+        const fl = text.split('\n').find(l => l.trim() && !l.startsWith('#'));
+        if (fl && fl.includes('.m3u8')) return { url: fl.trim(), method: 'cricket-live', referer: 'https://teachtrendhub.com/' };
+      }
+    } catch {}
   }
+  return null;
+}
 
-  const { fid, v_con, v_dt } = await extractFid(serverUrl);
-  const srhadyEvents = await fetchSrhadyEvents();
+/* ── Main extraction with fallback chain ── */
+async function extractStream(serverUrl, title) {
+  const ck = serverUrl + (title || '');
+  if (cache.strCache[ck] && Date.now() - cache.strCache[ck].time < STTL) return cache.strCache[ck].data;
+
+  const { fid, v_con, v_dt } = await getFid(serverUrl);
+  const events = await getSrhadyEv();
 
   let result = null;
 
-  // Try 1: pzo.php (works from some server IPs)
+  // Try methods in order: fastest/reliable first
   if (fid) {
-    result = await tryPzoExtract(fid, v_con, v_dt);
-    if (result) { cache.streamCache[cacheKey] = { result, time: Date.now() }; return result; }
-
-    // Try 2: playergo1.php fallback
-    result = await tryPlayerGo(fid, v_con, v_dt);
-    if (result) { cache.streamCache[cacheKey] = { result, time: Date.now() }; return result; }
+    result = await m1_execShip(fid) || await m2_execShipWarm(fid) || await m6_srhadyCdn(fid, events) || await m3_pzo(fid, v_con, v_dt) || await m4_news123(fid) || await m5_playergo1(fid, v_con, v_dt) || await m7_altEndpoints(fid);
   }
 
-  // Try 3: Direct CDN via srhady (title matching against Live_Events.json)
-  // We don't need login page to get title - we cache it from match context
-  if (srhadyEvents.length > 0 && fid) {
-    // We'll match by fid which is the channel id
-    const channelId = fid;
-    for (const ev of srhadyEvents) {
-      const evId = (ev.embed || '').match(/id=([^&]+)/);
-      if (evId && evId[1] === channelId) {
-        const chMatch = (ev.channel_id || '').match(/(\d+)/);
-        if (chMatch) {
-          const cdnUrl = `https://zohanayaan.com:1686/live/${chMatch[1]}.m3u8?md5=${Date.now()}&token=1`;
-          result = { url: cdnUrl, method: 'srhady-cdn', referer: 'https://teachtrendhub.com/' };
-          cache.streamCache[cacheKey] = { result, time: Date.now() };
-          return result;
-        }
-      }
-    }
+  // Try cricket live if title available
+  if (!result && title) result = await m8_cricketLive(title);
+
+  if (result) {
+    cache.strCache[ck] = { data: result, time: Date.now() };
+    return result;
   }
 
-  // Return fid for client-side extraction as last resort
-  cache.streamCache[cacheKey] = { result: { fid, v_con, v_dt, method: 'client-fallback' }, time: Date.now() };
+  cache.strCache[ck] = { data: { fid, v_con, v_dt, method: 'client-fallback' }, time: Date.now() };
   return { fid, v_con, v_dt, method: 'client-fallback' };
 }
 
-// ── Handler ──
+/* ── Inline proxy ── */
+async function proxyStream(proxyUrl, referer) {
+  const resp = await fetch(proxyUrl, { headers: { Referer: referer || 'https://bhalocast.com/' } });
+  const ct = resp.headers['content-type'] || '';
+  if (ct.includes('mpegurl') || ct.includes('apple') || proxyUrl.includes('.m3u8')) {
+    const base = proxyUrl.substring(0, proxyUrl.lastIndexOf('/') + 1);
+    const ref = referer || 'https://bhalocast.com/';
+    const lines = resp.text.split('\n').map(line => {
+      const t = line.trim();
+      if (t && !t.startsWith('#') && !t.startsWith('http')) return `/api/crichd?action=proxy&url=${encodeURIComponent(base + t)}&referer=${encodeURIComponent(ref)}`;
+      return line;
+    }).join('\n');
+    return { type: 'application/vnd.apple.mpegurl', body: lines };
+  }
+  return { type: ct || 'video/mp2t', body: resp.text };
+}
+
+/* ── Handler ── */
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -279,85 +281,62 @@ module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
-  const { action, matchUrl, streamUrl, matchId, title, url: proxyUrl } = req.query;
+  const { action, matchUrl, streamUrl, title, url: pUrl } = req.query;
 
   try {
-    // ── inline proxy for m3u8/ts ──
-    if (action === 'proxy' && proxyUrl) {
-      const target = httpFetch(proxyUrl, { headers: { Referer: req.query.referer || 'https://bhalocast.com/' } });
-      const resp = await target;
-      const ct = resp.headers['content-type'] || '';
-      if (ct.includes('mpegurl') || ct.includes('apple') || proxyUrl.includes('.m3u8')) {
-        const baseUrl = proxyUrl.substring(0, proxyUrl.lastIndexOf('/') + 1);
-        const lines = resp.text.split('\n');
-        const rewritten = lines.map(line => {
-          const t = line.trim();
-          if (t && !t.startsWith('#') && !t.startsWith('http')) {
-            return `/api/crichd?action=proxy&url=${encodeURIComponent(baseUrl + t)}&referer=${encodeURIComponent(req.query.referer || 'https://bhalocast.com/')}`;
-          }
-          return line;
-        }).join('\n');
-        res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-        res.setHeader('Cache-Control', 'public, max-age=2');
-        return res.status(200).send(rewritten);
-      }
-      res.setHeader('Content-Type', ct || 'video/mp2t');
+    if (action === 'proxy' && pUrl) {
+      const { type, body } = await proxyStream(pUrl, req.query.referer);
+      res.setHeader('Content-Type', type);
       res.setHeader('Cache-Control', 'public, max-age=2');
-      return res.status(200).send(resp.text);
+      return res.status(200).send(body);
     }
 
-    // ── match servers ──
     if (action === 'servers' && matchUrl) {
-      const fullUrl = matchUrl.startsWith('http') ? matchUrl : BASE_URL + matchUrl;
-      const servers = await scrapeServers(fullUrl);
-      return res.json({ success: true, servers, total: servers.length });
+      const s = await scrapeServers(matchUrl.startsWith('http') ? matchUrl : C_TOP + matchUrl);
+      return res.json({ success: true, servers: s, total: s.length });
+    }
 
-    // ── stream extraction ──
-    } else if ((action === 'stream' && streamUrl) || action === 'resolve') {
-      const url = streamUrl || matchUrl;
-      const result = await extractStream(url);
-      if (result && result.url) {
+    if ((action === 'stream' && streamUrl) || action === 'resolve') {
+      const r = await extractStream(streamUrl || matchUrl, title);
+      if (r && r.url) {
         const proto = req.headers['x-forwarded-proto'] || 'https';
         const host = req.headers.host || 'localhost:3000';
-        const referer = result.referer || 'https://bhalocast.com/';
-        const proxied = `${proto}://${host}/api/crichd?action=proxy&url=${encodeURIComponent(result.url)}&referer=${encodeURIComponent(referer)}`;
-        return res.json({ success: true, stream: { url: proxied, headers: { Referer: referer } }, method: result.method, directUrl: result.url });
+        const ref = r.referer || 'https://bhalocast.com/';
+        return res.json({ success: true, stream: { url: `${proto}://${host}/api/crichd?action=proxy&url=${encodeURIComponent(r.url)}&referer=${encodeURIComponent(ref)}`, headers: { Referer: ref } }, method: r.method, directUrl: r.url });
       }
-      // Return fid for client-side extraction
-      return res.json({ success: false, fid: result?.fid, v_con: result?.v_con, v_dt: result?.v_dt, method: result?.method, error: !result?.fid ? 'Could not extract stream' : undefined });
+      return res.json({ success: false, fid: r?.fid, v_con: r?.v_con, v_dt: r?.v_dt, method: r?.method, error: !r?.fid ? 'Could not extract stream' : undefined });
+    }
 
-    // ── srhady data ──
-    } else if (action === 'srhady') {
-      const [events, channels] = await Promise.all([fetchSrhadyEvents(), fetchSrhadyChannels()]);
-      return res.json({ success: true, events, channels24: channels, totalEvents: events.length, totalChannels: channels.length });
+    if (action === 'srhady') {
+      const [ev, ch] = await Promise.all([getSrhadyEv(), getSrhadyCh()]);
+      return res.json({ success: true, events: ev, channels24: ch, totalEvents: ev.length, totalChannels: ch.length });
+    }
 
-    // ── srhady live events ──
-    } else if (action === 'srhady-events') {
-      const events = await fetchSrhadyEvents();
-      return res.json({ success: true, events, total: events.length });
+    if (action === 'srhady-events') {
+      const ev = await getSrhadyEv();
+      return res.json({ success: true, events: ev, total: ev.length });
+    }
 
-    // ── srhady 24/7 channels ──
-    } else if (action === 'channels') {
-      const channels = await fetchSrhadyChannels();
-      return res.json({ success: true, channels, total: channels.length });
+    if (action === 'channels') {
+      const ch = await getSrhadyCh();
+      return res.json({ success: true, channels: ch, total: ch.length });
+    }
 
-    // ── cricket live direct ──
-    } else if (action === 'cricket-live' && title) {
-      const result = await tryCricketLive(title);
-      if (result) {
+    if (action === 'cricket-live' && title) {
+      const r = await m8_cricketLive(title);
+      if (r) {
         const proto = req.headers['x-forwarded-proto'] || 'https';
         const host = req.headers.host || 'localhost:3000';
-        const referer = 'https://teachtrendhub.com/';
-        const proxied = `${proto}://${host}/api/crichd?action=proxy&url=${encodeURIComponent(result.url)}&referer=${encodeURIComponent(referer)}`;
-        return res.json({ success: true, stream: { url: proxied }, method: result.method, directUrl: result.url });
+        const ref = 'https://teachtrendhub.com/';
+        return res.json({ success: true, stream: { url: `${proto}://${host}/api/crichd?action=proxy&url=${encodeURIComponent(r.url)}&referer=${encodeURIComponent(ref)}` }, method: r.method, directUrl: r.url });
       }
       return res.json({ success: false, error: 'No direct CDN URL found' });
-
-    // ── matches ──
-    } else {
-      const matches = await scrapeMatches();
-      return res.json({ success: true, matches, total: matches.length, fetchedAt: new Date().toISOString() });
     }
+
+    // Default: matches
+    const matches = await scrapeMatches();
+    return res.json({ success: true, matches, total: matches.length, fetchedAt: new Date().toISOString() });
+
   } catch (err) {
     return res.json({ success: false, error: err.message, fetchedAt: new Date().toISOString() });
   }
