@@ -268,6 +268,8 @@
         <option value="__LIVE_CHANNELS__">📡 Live Sports Channels</option>
         <option value="__PREMIUM_CHANNELS__">📺 Premium Channels</option>
         <option value="__IPL_ADS__">🏏 Watch IPL with Ads</option>
+        <option value="__CHANNELS_24__">📺 24/7 Channels</option>
+        <option value="__FANCODE__">🏏 FanCode</option>
         <option value="__WWE_LIVE__">🤼 WWE LIVE</option>
         <option value="__WWE_HIGHLIGHTS__">🎬 WWE Highlights</option>
         <option value="__ICC_TV__">🏏 ICC TV</option>
@@ -1010,6 +1012,74 @@ let cachedMatches = null;
       const d = new Date(timestamp * 1000);
       const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       return { display: `${timeStr} (in ${h}h ${m}m)`, isLive: false };
+    }
+
+    async function loadChannels24() {
+      channelListEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading 24/7 channels...</div>';
+      try {
+        const res = await fetch('/api/srhady?action=channels');
+        const data = await res.json();
+        if (!data.success || !data.channels || data.channels.length === 0) {
+          channelListEl.innerHTML = '<div class="crichd-error">No channels found.</div>'; return;
+        }
+        allChannels = data.channels.map(ch => ({
+          name: ch.name,
+          url: `/api/hls-proxy?url=${encodeURIComponent(ch.url)}&referer=${encodeURIComponent(ch.referer || 'https://executeandship.com/')}&origin=${encodeURIComponent('https://executeandship.com')}`,
+          logo: ch.logo || '',
+          group: ch.group || 'Sports',
+        }));
+        channelListEl.innerHTML = '';
+        allChannels.forEach(ch => {
+          const div = document.createElement('div');
+          div.className = 'channel';
+          const logoDiv = document.createElement('div');
+          logoDiv.className = 'logo';
+          if (ch.logo) {
+            const img = document.createElement('img');
+            img.src = ch.logo;
+            img.onerror = () => { logoDiv.innerHTML = '<span style="font-size:24px;">📺</span>'; };
+            logoDiv.appendChild(img);
+          } else {
+            logoDiv.innerHTML = '<span style="font-size:24px;">📺</span>';
+          }
+          const infoDiv = document.createElement('div');
+          infoDiv.className = 'ch-info';
+          infoDiv.innerHTML = `<div class="ch-name">${ch.name}</div><div class="ch-country">${ch.group}</div>`;
+          div.appendChild(logoDiv);
+          div.appendChild(infoDiv);
+          div.onclick = () => playChannel(ch);
+          channelListEl.appendChild(div);
+        });
+      } catch (err) {
+        channelListEl.innerHTML = `<div class="crichd-error">Failed: ${err.message}</div>`;
+      }
+    }
+
+    async function loadFancode() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading FanCode channels...</div>';
+      try {
+        const res = await fetch('/api/fancode');
+        const data = await res.json();
+        if (!data.success || !data.channels || data.channels.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No FanCode channels available.</div>'; return;
+        }
+        const channels = data.channels.map(ch => ({
+          name: ch.name, url: ch.url, logo: ch.logo || '', group: ch.group || 'Cricket', referer: ch.referer || 'https://www.fancode.com/',
+        }));
+        const html = channels.map(ch => {
+          const logoHtml = ch.logo ? `<img src="${esc(ch.logo)}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentNode.innerHTML='<span style=font-size:24px;>📺</span>'">` : '<span style="font-size:24px;">📺</span>';
+          return `<div class="channel" onclick="playFanCodeChannel('${esc(ch.name)}','${esc(ch.url)}')"><div class="logo">${logoHtml}</div><div class="ch-info"><div class="ch-name">${esc(ch.name)}</div><div class="ch-country">${esc(ch.group)}</div></div></div>`;
+        }).join('');
+        grid.innerHTML = `<div class="section-header">FanCode <span style="font-size:12px;color:#888;">(${channels.length} channels)</span></div>${html}`;
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed: ${err.message}</div>`;
+      }
+    }
+
+    function playFanCodeChannel(title, url) {
+      const proxyUrl = `/api/hls-proxy?url=${encodeURIComponent(url)}&referer=https://www.fancode.com/&origin=https://www.fancode.com`;
+      playCricHDStream(title, proxyUrl);
     }
 
     async function loadCricHDPlaylist() {
@@ -2088,6 +2158,9 @@ let cachedMatches = null;
             ).join('');
             nowPlayingEl.innerHTML = `Playing: ${match.title} (${data.servers[0].name}) ${serverBtns} <button onclick="popOutCricHD('${esc(streamData.stream.url)}', '${esc(match.title)}')" style="background:#4a9eff;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px;">Pop Out 📺</button>`;
           }
+        } else if (streamData.fid) {
+          nowPlayingEl.innerHTML = '<div class="loading-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Resolving stream via browser...';
+          clientExtractAndPlay(data.servers[0].url, match.title, streamData.fid, streamData.v_con, streamData.v_dt);
         } else {
           nowPlayingEl.innerHTML = 'Stream unavailable: ' + match.title;
         }
@@ -2103,6 +2176,9 @@ let cachedMatches = null;
       if (streamData.success && streamData.stream) {
         playCricHDStream(title, streamData.stream.url);
         nowPlayingEl.innerHTML = `Playing: ${title} <button onclick="popOutCricHD('${esc(streamData.stream.url)}', '${esc(title)}')" style="background:#4a9eff;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px;">Pop Out 📺</button>`;
+      } else if (streamData.fid) {
+        nowPlayingEl.innerHTML = '<div class="loading-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Resolving stream via browser...';
+        clientExtractAndPlay(url, title, streamData.fid, streamData.v_con, streamData.v_dt);
       } else {
         nowPlayingEl.innerHTML = 'Failed to load: ' + title;
       }
@@ -2115,7 +2191,6 @@ let cachedMatches = null;
 
       if (streamData.success && streamData.stream) {
         if (window.Android) {
-          // On Android, send directly to floating player
           try {
             Android.startStreamRkoFloatingPlayer(streamData.stream.url, title);
           } catch(e) {
@@ -2124,9 +2199,69 @@ let cachedMatches = null;
         } else {
           playCricHDStream(title, streamData.stream.url);
         }
+      } else if (streamData.fid) {
+        nowPlayingEl.innerHTML = '<div class="loading-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Resolving stream via browser...';
+        clientExtractAndPlay(url, title, streamData.fid, streamData.v_con, streamData.v_dt);
       } else {
         nowPlayingEl.innerHTML = 'Failed to load: ' + title;
       }
+    }
+
+    async function clientExtractAndPlay(serverUrl, title, fid, v_con, v_dt) {
+      if (!fid) {
+        try {
+          const res = await fetch(`/api/crichd?action=stream&streamUrl=${encodeURIComponent(serverUrl)}`);
+          const data = await res.json();
+          fid = data.fid; v_con = data.v_con || ''; v_dt = data.v_dt || '';
+        } catch(e) {}
+      }
+      if (!fid) { nowPlayingEl.innerHTML = 'Failed to resolve: ' + title; return; }
+
+      const bhalocastUrl = `https://bhalocast.com/news123.php?v=${fid}`;
+      let hiddenIframe = document.createElement('iframe');
+      hiddenIframe.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;';
+      document.body.appendChild(hiddenIframe);
+      hiddenIframe.src = bhalocastUrl;
+      await new Promise(r => setTimeout(r, 4500));
+
+      try {
+        const resp = await fetch(bhalocastUrl, {
+          credentials: 'include',
+          headers: { 'Referer': 'https://playerado.top/', 'Accept': '*/*' }
+        });
+        if (resp.ok) {
+          const text = await resp.text();
+          const m3u8Match = text.match(/["'](https?:\/\/[^"']*?bhalocast[^"']*?m3u8[^"']*?)["']/);
+          if (m3u8Match) {
+            const url = m3u8Match[1].replace(/\\\//g, '/');
+            hiddenIframe.remove();
+            playCricHDStream(title, `/api/hls-proxy?url=${encodeURIComponent(url)}&referer=https://bhalocast.com/&origin=https://bhalocast.com`);
+            return;
+          }
+        }
+      } catch(e) {}
+
+      try {
+        hiddenIframe.src = `https://bhalocast.com/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt || '123456'}`;
+        await new Promise(r => setTimeout(r, 4000));
+        const resp2 = await fetch(`https://bhalocast.com/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt || '123456'}`, {
+          credentials: 'include',
+          headers: { 'Referer': 'https://playerado.top/', 'Accept': '*/*' }
+        });
+        if (resp2.ok) {
+          const text2 = await resp2.text();
+          const m2 = text2.match(/["'](https?:\/\/[^"']*?bhalocast[^"']*?m3u8[^"']*?)["']/);
+          if (m2) {
+            const url2 = m2[1].replace(/\\\//g, '/');
+            hiddenIframe.remove();
+            playCricHDStream(title, `/api/hls-proxy?url=${encodeURIComponent(url2)}&referer=https://bhalocast.com/&origin=https://bhalocast.com`);
+            return;
+          }
+        }
+      } catch(e) {}
+
+      hiddenIframe.remove();
+      nowPlayingEl.innerHTML = 'Failed to resolve stream: ' + title;
     }
 
     let prefetchCache = {};
@@ -2201,6 +2336,22 @@ let cachedMatches = null;
         document.body.classList.add('crichd-mode');
         document.body.classList.remove('playlist-mode');
         loadFootyStream();
+        return;
+      }
+
+      // 24/7 Channels - direct m3u8 from updated playlists
+      if (url === '__CHANNELS_24__') {
+        document.body.classList.add('playlist-mode');
+        document.body.classList.remove('crichd-mode');
+        loadChannels24();
+        return;
+      }
+
+      // FanCode
+      if (url === '__FANCODE__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadFancode();
         return;
       }
 

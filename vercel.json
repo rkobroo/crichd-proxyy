@@ -12,6 +12,8 @@
     { "source": "/api/footystream", "destination": "/api/footystream.js" },
     { "source": "/api/live-channels", "destination": "/api/live-channels.js" },
     { "source": "/api/hls-proxy", "destination": "/api/hls-proxy.js" },
+    { "source": "/api/srhady", "destination": "/api/srhady.js" },
+    { "source": "/api/fancode", "destination": "/api/fancode.js" },
     { "source": "/api/heartbeat", "destination": "/api/heartbeat.js" },
     { "source": "/api/latest-version", "destination": "/api/heartbeat" },
     { "source": "/api/apk-download", "destination": "/api/apk-download.js" },
@@ -46,6 +48,22 @@
     },
     {
       "source": "/api/webcric",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    },
+    {
+      "source": "/api/srhady",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    },
+    {
+      "source": "/api/fancode",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
