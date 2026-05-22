@@ -2,21 +2,6 @@
   "version": 2,
   "rewrites": [
     { "source": "/api/crichd", "destination": "/api/crichd.js" },
-    { "source": "/api/crichd-proxy", "destination": "/api/crichd-proxy.js" },
-    { "source": "/api/watchwrestling", "destination": "/api/watchwrestling.js" },
-    { "source": "/api/icc", "destination": "/api/webcric" },
-    { "source": "/api/webcric", "destination": "/api/webcric.js" },
-    { "source": "/api/streamfree", "destination": "/api/streamfree.js" },
-    { "source": "/api/sf-proxy", "destination": "/api/sf-proxy.js" },
-    { "source": "/api/streamfree-direct", "destination": "/api/streamfree-direct.js" },
-    { "source": "/api/footystream", "destination": "/api/footystream.js" },
-    { "source": "/api/live-channels", "destination": "/api/live-channels.js" },
-    { "source": "/api/hls-proxy", "destination": "/api/hls-proxy.js" },
-    { "source": "/api/heartbeat", "destination": "/api/heartbeat.js" },
-    { "source": "/api/latest-version", "destination": "/api/heartbeat" },
-    { "source": "/api/apk-download", "destination": "/api/apk-download.js" },
-    { "source": "/rkotv.apk", "destination": "/api/apk-download" },
-    { "source": "/rkotv-file.apk", "destination": "/rkotv-file.apk" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
@@ -37,56 +22,9 @@
       ]
     },
     {
-      "source": "/api/watchwrestling",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "*" }
-      ]
-    },
-    {
-      "source": "/api/webcric",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "*" }
-      ]
-    },
-    {
-      "source": "/api/streamfree",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "*" }
-      ]
-    },
-    {
-      "source": "/api/sf-proxy",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "*" }
-      ]
-    },
-    {
-      "source": "/api/streamfree-direct",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "*" }
-      ]
-    },
-    {
       "source": "/manifest.json",
       "headers": [
         { "key": "Content-Type", "value": "application/manifest+json" }
-      ]
-    },
-    {
-      "source": "/rkotv-file.apk",
-      "headers": [
-        { "key": "Content-Type", "value": "application/vnd.android.package-archive" },
-        { "key": "Content-Disposition", "value": "attachment; filename=\"rkotv.apk\"" }
       ]
     }
   ]
