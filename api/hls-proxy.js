@@ -1,95 +1,114 @@
 const https = require('https');
-const http = require('http');
+
+const REPO = 'https://raw.githubusercontent.com/srhady/crichd-speical-live-event/main';
+const cache = { data: null, time: 0 };
+const CACHE_TTL = 60000; // 1 min
+
+function httpGetText(url) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    const opts = {
+      hostname: urlObj.hostname,
+      port: urlObj.port || 443,
+      path: urlObj.pathname + urlObj.search,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': '*/*',
+      },
+      timeout: 15000,
+    };
+    const req = https.request(opts, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+    req.end();
+  });
+}
+
+function parseM3U(text) {
+  const channels = [];
+  const lines = text.split('\n');
+  let current = {};
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#EXTINF:')) {
+      const logoMatch = trimmed.match(/tvg-logo="([^"]*)"/);
+      const groupMatch = trimmed.match(/group-title="([^"]*)"/);
+      const commaIdx = trimmed.lastIndexOf(',');
+      const name = commaIdx >= 0 ? trimmed.substring(commaIdx + 1).trim() : '';
+      current = {
+        name: name.replace(/\s*\([^)]*\)\s*$/, '').trim() || name,
+        logo: logoMatch ? logoMatch[1] : '',
+        group: groupMatch ? groupMatch[1] : 'Uncategorized',
+        referer: '',
+        userAgent: '',
+      };
+    } else if (trimmed.startsWith('#EXTVLCOPT:http-referrer=')) {
+      current.referer = trimmed.split('=').slice(1).join('=');
+    } else if (trimmed.startsWith('#EXTVLCOPT:http-user-agent=')) {
+      current.userAgent = trimmed.split('=').slice(1).join('=');
+    } else if (trimmed.startsWith('http') && current.name) {
+      current.url = trimmed;
+      channels.push({ ...current });
+      current = {};
+    }
+  }
+  return channels;
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Content-Type', 'application/json');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  const { url: targetUrl, referer, origin, ua } = req.query;
-  if (!targetUrl) {
-    res.status(400).json({ error: 'Missing url parameter' });
-    return;
-  }
-
-  const decodedUrl = decodeURIComponent(targetUrl);
-  const isM3U = decodedUrl.includes('.m3u8');
-
-  const urlObj = new URL(decodedUrl);
-  const mod = urlObj.protocol === 'http:' ? http : https;
-
-  const opts = {
-    hostname: urlObj.hostname,
-    port: urlObj.port || 443,
-    path: urlObj.pathname + urlObj.search,
-    method: 'GET',
-    headers: {
-      'User-Agent': ua || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0',
-      'Accept': '*/*',
-      'Referer': referer || 'https://executeandship.com/',
-    },
-    timeout: 30000,
-    rejectUnauthorized: false,
-  };
-
-  if (origin) {
-    opts.headers['Origin'] = origin;
-  }
-
-  const reqOut = mod.request(opts, (resOut) => {
-    res.status(resOut.statusCode);
-
-    const contentType = resOut.headers['content-type'] || '';
-    if (isM3U) {
-      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-    } else {
-      if (contentType) res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Access-Control-Allow-Origin', '*');
+  try {
+    if (cache.data && Date.now() - cache.time < CACHE_TTL) {
+      res.status(200).json(cache.data);
+      return;
     }
+    const [playlistM3u, goLiveM3u, liveEventsJson, goLiveJson, footyJson] = await Promise.all([
+      httpGetText(`${REPO}/playlist.m3u`).catch(() => ''),
+      httpGetText(`${REPO}/Go_Live_Events.m3u`).catch(() => ''),
+      httpGetText(`${REPO}/Live_Events.json`).catch(() => '{}'),
+      httpGetText(`${REPO}/Go_Live_Events.json`).catch(() => '{}'),
+      httpGetText(`${REPO}/Footy_Live.json`).catch(() => '{}'),
+    ]);
 
-    let data = [];
-    resOut.on('data', chunk => data.push(chunk));
-    resOut.on('end', () => {
-      const body = Buffer.concat(data);
+    const channels = parseM3U(playlistM3u);
+    const goLiveChannels = parseM3U(goLiveM3u);
+    const allChannels = [...channels, ...goLiveChannels];
 
-      if (isM3U) {
-        let text = body.toString('utf8');
-        const proxyBase = `/api/hls-proxy?ua=${encodeURIComponent(ua || '')}&referer=${encodeURIComponent(referer || 'https://executeandship.com/')}&origin=${encodeURIComponent(origin || 'https://executeandship.com')}&url=`;
-        const lines = text.split('\n');
-        const rewritten = lines.map(line => {
-          const trimmed = line.trim();
-          if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('http')) {
-            const absUrl = new URL(trimmed, decodedUrl).href;
-            return proxyBase + encodeURIComponent(absUrl);
-          }
-          if (trimmed && !trimmed.startsWith('#') && trimmed.startsWith('http')) {
-            return proxyBase + encodeURIComponent(trimmed);
-          }
-          return line;
-        });
-        res.send(rewritten.join('\n'));
-      } else {
-        res.send(body);
-      }
-    });
-  });
+    let liveEvents = [];
+    try {
+      liveEvents = JSON.parse(liveEventsJson).matches || [];
+    } catch (e) {}
 
-  reqOut.on('error', (err) => {
-    res.status(502).json({ error: err.message });
-  });
+    let goLiveEvents = [];
+    try {
+      goLiveEvents = JSON.parse(goLiveJson).channels || [];
+    } catch (e) {}
 
-  reqOut.on('timeout', () => {
-    reqOut.destroy();
-    res.status(504).json({ error: 'Timeout' });
-  });
-
-  reqOut.end();
+    const result = {
+      success: true,
+      totalChannels: allChannels.length,
+      channels: allChannels,
+      liveEvents,
+      goLiveEvents,
+    };
+    cache.data = result;
+    cache.time = Date.now();
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(200).json({ success: false, error: err.message, channels: [], liveEvents: [], goLiveEvents: [] });
+  }
 };
