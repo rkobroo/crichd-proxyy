@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RKO TV — Download Stats</title>
+  <link rel="icon" type="image/png" href="/logo2.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: linear-gradient(135deg, #0a0a1a, #16213e); color: #fff; min-height: 100vh; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: #888; font-size: 14px; margin-bottom: 24px; }
+
+    .login-box { max-width: 320px; margin: 100px auto; text-align: center; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 32px 24px; }
+    .login-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; font-size: 16px; margin: 16px 0; outline: none; }
+    .login-box input:focus { border-color: #4a9eff; }
+    .login-box button { width: 100%; padding: 12px; background: #4a9eff; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; }
+    .login-box .error { color: #e00; font-size: 13px; margin-top: 8px; display: none; }
+
+    .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .total-badge { background: linear-gradient(135deg, #4a9eff, #3a8eef); padding: 8px 20px; border-radius: 20px; font-size: 18px; font-weight: 700; }
+    .refresh-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .refresh-btn:hover { background: rgba(255,255,255,0.2); }
+    .del-btn { background: none; border: none; color: #e00; cursor: pointer; font-size: 16px; opacity: 0.4; transition: opacity 0.2s; }
+    .del-btn:hover { opacity: 1; }
+
+    .country-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .country-card { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .country-card .count { background: #4a9eff; color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #333; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 10px 12px; border-bottom: 1px solid #222; font-size: 13px; vertical-align: middle; }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .ua-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ip-cell { color: #aaa; font-family: monospace; font-size: 12px; }
+    .time-cell { color: #aaa; font-size: 12px; white-space: nowrap; }
+
+    .loading { text-align: center; padding: 40px; color: #888; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loginScreen" class="login-box">
+      <h1>🔒 Admin</h1>
+      <p style="color:#888;font-size:13px;margin-top:4px;">Enter password to view download stats</p>
+      <input type="password" id="passInput" placeholder="Password" autocomplete="off">
+      <button onclick="checkPass()">Login</button>
+      <div id="loginError" class="error">Wrong password</div>
+    </div>
+
+    <div id="statsScreen" class="hidden">
+      <div class="stats-header">
+        <div>
+          <h1>📥 Download Stats</h1>
+          <div class="subtitle">Track who downloads the RKO TV APK</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="totalBadge" class="total-badge">0</span>
+          <a href="/" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;">← App</a>
+          <button class="refresh-btn" onclick="loadStats()">⟳ Refresh</button>
+          <button class="refresh-btn" onclick="clearStats()" style="background:#e00;">🗑 Clear All</button>
+        </div>
+      </div>
+
+      <div id="liveUsersSection" style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.2);border-radius:10px;padding:14px 18px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-weight:600;font-size:15px;">🟢 Live Now</span>
+          <span id="liveCountBadge" style="background:#00cc44;padding:3px 12px;border-radius:12px;font-size:13px;font-weight:700;">0 users</span>
+        </div>
+        <div id="liveUsersList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:13px;"></div>
+      </div>
+
+      <div id="countrySummary" class="country-summary"></div>
+
+      <div id="tableWrap">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+    const MAX_ATTEMPTS = 5;
+    const LOCKOUT_MS = 2 * 60 * 1000; // 2 minutes
+
+    async function sha256(text) {
+      const buf = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function getLockoutInfo() {
+      const attempts = parseInt(localStorage.getItem('adminAttempts') || '0');
+      const lockoutUntil = parseInt(localStorage.getItem('adminLockout') || '0');
+      const now = Date.now();
+      if (lockoutUntil > now) return { attempts, locked: true, remaining: Math.ceil((lockoutUntil - now) / 1000) };
+      if (lockoutUntil > 0 && lockoutUntil <= now) {
+        localStorage.removeItem('adminLockout');
+        localStorage.setItem('adminAttempts', '0');
+      }
+      return { attempts: attempts >= MAX_ATTEMPTS ? 0 : attempts, locked: false, remaining: 0 };
+    }
+
+    function recordWrongAttempt() {
+      const info = getLockoutInfo();
+      const newAttempts = info.attempts + 1;
+      localStorage.setItem('adminAttempts', String(newAttempts));
+      if (newAttempts >= MAX_ATTEMPTS) {
+        localStorage.setItem('adminLockout', String(Date.now() + LOCKOUT_MS));
+      }
+    }
+
+    async function checkPass() {
+      const info = getLockoutInfo();
+      if (info.locked) {
+        document.getElementById('loginError').textContent = `Locked! Try again in ${info.remaining}s`;
+        document.getElementById('loginError').style.display = 'block';
+        return;
+      }
+
+      const input = document.getElementById('passInput');
+      const hash = await sha256(input.value);
+      if (hash === PASS_HASH) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('statsScreen').classList.remove('hidden');
+        loadStats(); loadLiveUsers(); setInterval(loadLiveUsers, 15000);
+      } else {
+        recordWrongAttempt();
+        const newInfo = getLockoutInfo();
+        if (newInfo.locked) {
+          document.getElementById('loginError').textContent = 'Too many attempts! Wait 2 minutes 🔒';
+        } else {
+          document.getElementById('loginError').textContent = `vaak bsdk padai kar 😏😘😣 (${newInfo.attempts}/${MAX_ATTEMPTS})`;
+        }
+        document.getElementById('loginError').style.display = 'block';
+        setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+      }
+    }
+
+    document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkPass(); });
+
+    // Check lockout on page load and show countdown
+    (function checkLockout() {
+      const info = getLockoutInfo();
+      if (info.locked) {
+        const input = document.getElementById('passInput');
+        input.disabled = true;
+        input.placeholder = `Locked (${info.remaining}s)`;
+        setTimeout(checkLockout, 1000);
+      } else {
+        const input = document.getElementById('passInput');
+        if (input) { input.disabled = false; input.placeholder = 'Password'; }
+      }
+    })();
+
+    function getFlag(code) {
+      if (!code) return '🌐';
+      try { return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)); } catch(e) { return '🌐'; }
+    }
+
+    function getCountryName(code) {
+      const names = { NP:'Nepal', US:'United States', IN:'India', GB:'United Kingdom', CA:'Canada', AU:'Australia', DE:'Germany', FR:'France', JP:'Japan', KR:'South Korea', BR:'Brazil', RU:'Russia', CN:'China', PK:'Pakistan', BD:'Bangladesh', LK:'Sri Lanka', AE:'UAE', SA:'Saudi Arabia', QA:'Qatar', KW:'Kuwait', BH:'Bahrain', OM:'Oman', NZ:'New Zealand', SG:'Singapore', MY:'Malaysia', TH:'Thailand', PH:'Philippines', ID:'Indonesia', ZA:'South Africa', NG:'Nigeria', KE:'Kenya', EG:'Egypt', IT:'Italy', ES:'Spain', NL:'Netherlands', SE:'Sweden', NO:'Norway', DK:'Denmark', FI:'Finland', IE:'Ireland', PT:'Portugal', AT:'Austria', CH:'Switzerland', BE:'Belgium', PL:'Poland', CZ:'Czech Republic', HU:'Hungary', RO:'Romania', GR:'Greece', TR:'Turkey', IL:'Israel', MX:'Mexico', AR:'Argentina', CL:'Chile', CO:'Colombia' };
+      return names[code] || code;
+    }
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const day = d.getDate();
+      const month = months[d.getMonth()];
+      const hours = d.getHours().toString().padStart(2,'0');
+      const mins = d.getMinutes().toString().padStart(2,'0');
+      return `${day} ${month} ${hours}:${mins}`;
+    }
+
+    function maskIP(ip) {
+      if (!ip) return '—';
+      const parts = ip.split('.');
+      if (parts.length === 4) return `${parts[0]}.${parts[1]}.*.*`;
+      return ip.substring(0, ip.length - 4) + '.*.*';
+    }
+
+    function formatUA(ua) {
+      if (!ua) return '—';
+      if (ua.includes('Chrome') && ua.includes('Android')) return 'Android Chrome';
+      if (ua.includes('Firefox')) return 'Firefox';
+      if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+      if (ua.includes('Edge')) return 'Edge';
+      if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+      if (ua.includes('Android')) return 'Android';
+      if (ua.includes('iPhone')) return 'iPhone';
+      if (ua.includes('iPad')) return 'iPad';
+      if (ua.includes('Windows')) return 'Windows';
+      if (ua.includes('Mac')) return 'Mac';
+      if (ua.length > 40) return ua.substring(0, 40) + '...';
+      return ua;
+    }
+
+    function formatUA(ua) {
+      if (!ua) return '—';
+      let os = 'Unknown';
+      if (ua.includes('Android 15')) os = 'Android 15';
+      else if (ua.includes('Android 14')) os = 'Android 14';
+      else if (ua.includes('Android 13')) os = 'Android 13';
+      else if (ua.includes('Android 12')) os = 'Android 12';
+      else if (ua.includes('Android')) os = 'Android';
+      else if (ua.includes('iPhone')) os = 'iPhone';
+      else if (ua.includes('iPad')) os = 'iPad';
+      else if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
+      else if (ua.includes('Windows NT 6.3')) os = 'Windows 8.1';
+      else if (ua.includes('Macintosh')) os = 'macOS';
+      else if (ua.includes('Linux')) os = 'Linux';
+
+      let browser = 'Unknown';
+      if (ua.includes('Edg/')) browser = 'Edge';
+      else if (ua.includes('OPR') || ua.includes('Opera')) browser = 'Opera';
+      else if (ua.includes('Firefox')) browser = 'Firefox';
+      else if (ua.includes('Chrome') || ua.includes('CriOS')) browser = 'Chrome';
+      else if (ua.includes('Safari')) browser = 'Safari';
+
+      return `${os} · ${browser}`;
+    }
+
+    function getDeviceName(ua) {
+      if (!ua) return '—';
+      const m = ua.match(/\(([^)]+)\)/);
+      if (!m) return '—';
+      const info = m[1];
+      // Android: "Linux; Android 13; SM-S918B"
+      const androidParts = info.split(';').map(s => s.trim());
+      if (info.includes('Android') && androidParts.length >= 3) {
+        return androidParts[androidParts.length - 1].trim();
+      }
+      // iPhone: "iPhone; CPU iPhone OS 16_6 like Mac OS X"
+      if (ua.includes('iPhone')) return 'iPhone';
+      // iPad
+      if (ua.includes('iPad')) return 'iPad';
+      // Windows/Mac/Linux
+      return info.substring(0, 60);
+    }
+
+    async function loadLiveUsers() {
+      try {
+        const res = await fetch('/api/heartbeat?action=live');
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        document.getElementById('liveCountBadge').textContent = data.total + ' user' + (data.total !== 1 ? 's' : '');
+        const list = document.getElementById('liveUsersList');
+        if (data.total === 0) {
+          list.innerHTML = '<span style="color:#888;">No active users</span>';
+        } else {
+          list.innerHTML = data.users.map(u =>
+            '<span style="background:rgba(0,255,100,0.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(0,255,100,0.15);">' +
+            getFlag(u.country) + ' ' + getCountryName(u.country) +
+            ' <span style="color:#888;">' + (u.page ? u.page.replace(' (playing)','').split('/').pop() || '/' : '/') + '</span>' +
+            '</span>'
+          ).join('');
+        }
+      } catch(e) {
+        document.getElementById('liveCountBadge').textContent = 'Offline';
+        document.getElementById('liveUsersList').innerHTML = '<span style="color:#e00;">Failed to load</span>';
+      }
+    }
+
+    async function loadStats() {
+      const wrap = document.getElementById('tableWrap');
+      wrap.innerHTML = '<div class="loading">Loading downloads...</div>';
+
+      try {
+        const res = await fetch('/api/apk-download?action=stats');
+        const data = await res.json();
+
+        if (data.error) {
+          wrap.innerHTML = `<div class="loading" style="color:#e00">${data.error}</div>`;
+          return;
+        }
+
+        document.getElementById('totalBadge').textContent = `${data.total} downloads`;
+
+        const countries = {};
+        data.downloads.forEach(d => {
+          const c = d.country || 'unknown';
+          countries[c] = (countries[c] || 0) + 1;
+        });
+
+        const sorted = Object.entries(countries).sort((a, b) => b[1] - a[1]);
+        document.getElementById('countrySummary').innerHTML = sorted.map(([code, count]) =>
+          `<div class="country-card">${getFlag(code)} <span>${getCountryName(code)}</span><span class="count">${count}</span></div>`
+        ).join('');
+
+        if (data.downloads.length === 0) {
+          wrap.innerHTML = '<div class="loading">No downloads yet</div>';
+          return;
+        }
+
+        let html = '<div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Country</th><th>Device</th><th>Browser</th><th>IP</th><th>Time</th><th></th></tr></thead><tbody>';
+        data.downloads.forEach((d, i) => {
+          html += `<tr>
+            <td>${data.downloads.length - i}</td>
+            <td>${getFlag(d.country)} ${getCountryName(d.country)}</td>
+            <td>${getDeviceName(d.ua)}</td>
+            <td>${formatUA(d.ua)}</td>
+            <td class="ip-cell">${d.ip || '—'}</td>
+            <td class="time-cell">${formatTime(d.timestamp)}</td>
+            <td><button class="del-btn" onclick="deleteRecord('${d._id}')" title="Delete">✕</button></td>
+          </tr>`;
+        });
+        html += '</tbody></table></div>';
+        wrap.innerHTML = html;
+      } catch(e) {
+        wrap.innerHTML = `<div class="loading" style="color:#e00">Failed: ${e.message}</div>`;
+      }
+    }
+
+    async function clearStats() {
+      if (!confirm('Are you sure you want to delete all download records? This cannot be undone.')) return;
+      try {
+        const res = await fetch('/api/apk-download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'clear' }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert('All download records cleared.');
+          loadStats();
+        } else {
+          alert('Failed to clear: ' + (data.error || 'Unknown error'));
+        }
+      } catch(e) {
+        alert('Failed to clear: ' + e.message);
+      }
+    }
+
+    async function deleteRecord(id) {
+      if (!confirm('Delete this download record?')) return;
+      try {
+        const res = await fetch('/api/apk-download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id: id }),
+        });
+        const data = await res.json();
+        if (data.ok) loadStats();
+        else alert('Failed to delete: ' + (data.error || 'Unknown error'));
+      } catch(e) {
+        alert('Failed to delete: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

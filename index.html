@@ -1,0 +1,3304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script>
+    (function(){var RD='https://rkolive.vercel.app/download.html';function k(){setTimeout(function(){window.location.href=RD},0);try{window.close()}catch(e){}try{window.open('','_self').close()}catch(e){}var v=document.querySelector('video');if(v){v.pause();v.removeAttribute('src');v.load()}document.querySelectorAll('iframe').forEach(function(f){f.src=''});document.write('');document.title='';window.stop()}document.addEventListener('contextmenu',function(e){e.preventDefault()});document.addEventListener('keydown',function(e){if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key.toUpperCase()))||(e.ctrlKey&&e.key.toUpperCase()==='U')){e.preventDefault();return false}});setInterval(function(){var s=performance.now();(function(){}).constructor('debugger')();if(performance.now()-s>100)k()},500);var x=document.createElement('div');Object.defineProperty(x,'id',{get:k});console.log(x);setInterval(function(){if(window.outerWidth-window.innerWidth>200||window.outerHeight-window.innerHeight>200)k()},500)})();
+  </script>
+  <meta name="theme-color" content="#111111" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>RKO LIVE TV</title>
+  <link rel="icon" type="image/png" href="/logo2.png" />
+  <link rel="apple-touch-icon" href="/logo2.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link href="https://unpkg.com/video.js@8/dist/video-js.min.css" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui; margin: 0; background: #111; color: #fff; }
+    header { padding: 15px; background: #1a1a1a; border-bottom: 1px solid #333; }
+    header h1 { margin: 0 0 12px 0; font-size: 20px; }
+    .input-row { display: flex; gap: 10px; }
+    .url-input { flex: 1; padding: 12px 15px; font-size: 14px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 6px; }
+    .url-input:focus { border-color: #4a9eff; outline: none; }
+    .load-btn { padding: 12px 24px; background: #4a9eff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .load-btn:hover { background: #3a8eef; }
+    
+    .container { display: flex; height: calc(100vh - 130px); }
+    .sidebar { width: 320px; background: #1a1a1a; border-right: 1px solid #333; overflow-y: auto; }
+    .search-row { padding: 10px; border-bottom: 1px solid #333; background: #151515; }
+    .search-input { width: 100%; padding: 10px 15px; background: #2a2a2a; color: #fff; border: 1px solid #555; border-radius: 8px; font-size: 14px; }
+    .search-input:focus { border-color: #4a9eff; outline: none; background: #333; }
+    
+    .channels { padding: 8px; }
+    .channel { display: flex; align-items: center; gap: 12px; padding: 10px; margin-bottom: 6px; background: #252525; border-radius: 8px; cursor: pointer; }
+    .channel:hover { background: #333; }
+    .channel.playing { background: #1a3a1a; border: 1px solid #3a5a3a; }
+    .logo { width: 48px; height: 48px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .logo img { width: 100%; height: 100%; object-fit: contain; }
+    .logo span { font-size: 18px; color: #666; }
+    .ch-info { flex: 1; }
+    .ch-name { font-weight: 600; font-size: 14px; }
+    .ch-country { font-size: 12px; color: #888; }
+    
+    .main { flex: 1; display: flex; flex-direction: column; background: #0a0a0a; }
+    .now-playing { padding: 12px 16px; font-size: 14px; color: #888; }
+    .video-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .video-wrap video { width: 100%; height: 100%; background: #000; border-radius: 12px; object-fit: fill; }
+    
+    .loading { text-align: center; padding: 40px; color: #888; }
+    .loading-spinner { width: 40px; height: 40px; border: 3px solid #333; border-top: 3px solid #4a9eff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .chips { display: flex; gap: 8px; padding: 10px; flex-wrap: wrap; border-bottom: 1px solid #333; }
+    .chip { padding: 6px 14px; background: #252525; border-radius: 20px; font-size: 12px; cursor: pointer; }
+    .chip.active { background: #4a9eff; }
+    
+    .live-match { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 8px; background: linear-gradient(135deg, #1a2a1a 0%, #252525 100%); border-radius: 10px; cursor: pointer; border: 1px solid #2a4a2a; }
+    .live-match:hover { background: linear-gradient(135deg, #2a3a2a 0%, #2f2f2f 100%); border-color: #4a6a4a; }
+    .live-badge { background: #e00; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .match-teams { flex: 1; text-align: center; }
+    .match-teams .teams { font-weight: 600; font-size: 13px; }
+    .match-teams .time { font-size: 11px; color: #888; margin-top: 4px; }
+    .match-info { text-align: center; font-size: 11px; color: #888; }
+    
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #1a1a1a; border-radius: 16px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; border: 1px solid #333; }
+    .modal-header { padding: 16px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2 { margin: 0; font-size: 18px; }
+    .modal-close { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
+    .modal-body { padding: 16px; }
+    .stream-link { display: block; padding: 14px 16px; margin-bottom: 10px; background: #252525; border-radius: 10px; cursor: pointer; border: 1px solid #333; transition: all 0.2s; }
+    .stream-link:hover { background: #2f2f2f; border-color: #4a9eff; transform: translateX(4px); }
+    .stream-link .name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .stream-link .quality { font-size: 11px; color: #4a9eff; }
+    .match-detail { background: #252525; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
+    .match-detail .vs { font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0; }
+    .match-detail .league { font-size: 12px; color: #888; text-align: center; }
+    
+    /* Floating Player */
+    .float-player { position: fixed; bottom: 20px; right: 20px; z-index: 2147483647; background: #000; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow: hidden; transition: width 0.3s, height 0.3s; cursor: move; resize: both; min-width: 280px; min-height: 200px; max-width: 95vw; max-height: 90vh; }
+    .float-player.collapsed { width: 60px !important; height: 45px !important; resize: none; }
+    .float-player.size-small { width: 320px; height: 240px; }
+    .float-player.size-medium { width: 640px; height: 400px; }
+    .float-player.size-large { width: 960px; height: 540px; }
+    .float-player.fullscreen { width: 100vw !important; height: 100vh !important; top: 0 !important; left: 0 !important; bottom: 0 !important; right: 0 !important; border-radius: 0; resize: none; }
+    .float-player iframe { position: absolute; top: 30px; left: 0; width: 100%; height: calc(100% - 30px); border: none; }
+    .float-player video { position: absolute; top: 30px; left: 0; width: 100%; height: calc(100% - 30px); background: #000; object-fit: fill; }
+    .float-player .float-controls { transition: opacity 0.3s; }
+    .float-player.keep-controls .float-controls { opacity: 1 !important; pointer-events: auto !important; }
+    .float-player .float-drag-handle { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 48px; height: 28px; background: rgba(0,0,0,0.8); color: #fff; font-size: 22px; display: none; align-items: center; justify-content: center; cursor: move; border-radius: 8px 8px 0 0; z-index: 2; user-select: none; touch-action: none; }
+    .float-player .float-resize-handle { position: absolute; bottom: 0; right: 0; width: 36px; height: 28px; background: rgba(0,0,0,0.8); color: #fff; font-size: 16px; display: none; align-items: center; justify-content: center; cursor: nwse-resize; border-radius: 8px 0 0 0; z-index: 2; user-select: none; touch-action: none; }
+    .float-player.keep-controls .float-drag-handle,
+    .float-player.keep-controls .float-resize-handle { display: flex !important; }
+    .float-player.no-controls .float-controls { opacity: 0; pointer-events: none; }
+    .float-player.no-controls video { top: 0; height: 100%; }
+    .float-player.no-controls iframe { top: 0; height: 100%; }
+    .float-controls { position: absolute; top: 0; left: 0; right: 0; height: 30px; background: rgba(0,0,0,0.85); display: flex; justify-content: space-between; align-items: center; padding: 0 8px; z-index: 1; }
+    .float-btn { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; padding: 4px 8px; min-width: 28px; }
+    .float-btn:hover { color: #4a9eff; }
+    .float-title { color: #fff; font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex: 1; margin: 0 8px; }
+    .float-size-menu { position: absolute; top: 30px; right: 0; background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 8px; padding: 6px 0; display: none; z-index: 2; }
+    .float-size-menu.show { display: block; }
+    .float-size-menu button { display: block; width: 100%; padding: 8px 16px; background: none; border: none; color: #fff; font-size: 13px; cursor: pointer; text-align: left; white-space: nowrap; }
+    .float-size-menu button:hover { background: #333; }
+    .float-size-menu button.active { color: #4a9eff; }
+
+    .float-toggle-btn { position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #4a9eff; color: #fff; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(74,158,255,0.4); display: none; }
+    .float-toggle-btn:hover { background: #3a8eef; transform: scale(1.1); }
+    .float-close-btn { position: fixed; z-index: 2147483647; background: rgba(200,0,0,0.85); color: #fff; width: 28px; height: 28px; border-radius: 50%; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.5); font-weight: bold; user-select: none; }
+    .float-close-btn:hover { background: #e00; transform: scale(1.15); }
+
+    /* Hide sidebar/chips on CricHD mode */
+    body.crichd-mode .container .sidebar { display: none; }
+    body.crichd-mode .container { height: calc(100vh - 130px); }
+    body.crichd-mode .main { flex: 1; }
+    body.crichd-mode .live-section { display: block; }
+    body.playlist-mode .live-section { display: none; }
+    body.playlist-mode .container .sidebar { display: block; }
+
+    .watermark {
+      position: absolute; bottom: 120px; right: 16px; color: rgba(255,0,0,0.6);
+      font-size: 14px; font-weight: bold; pointer-events: none; user-select: none;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5); z-index: 2;
+    }
+    .video-wrap { position: relative; }
+    .float-watermark { bottom: 36px; right: 8px; font-size: 11px; }
+    
+    /* CricHD Live Matches Section */
+    .live-section { padding: 16px; background: #111; border-bottom: 1px solid #2a2a2a; }
+    .live-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .live-section-header h2 { margin: 0; font-size: 18px; color: #fff; }
+    .live-section-header h2 .live-dot { display: inline-block; width: 8px; height: 8px; background: #e00; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite; }
+    .refresh-btn { background: #252525; border: 1px solid #444; color: #888; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .refresh-btn:hover { background: #333; color: #fff; }
+    .live-matches-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .crichd-match { background: linear-gradient(135deg, #1a2a1a 0%, #252525 100%); border: 1px solid #2a4a2a; border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; }
+    .crichd-match:hover { border-color: #4a9eff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,158,255,0.2); }
+    .crichd-match .match-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 8px; }
+    .crichd-match .match-title img { vertical-align: middle; }
+    .crichd-match .match-title span { vertical-align: middle; }
+    .crichd-match .match-poster { width: 100%; height: 100px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .crichd-match .match-poster img { width: 100%; height: 100%; object-fit: cover; }
+    .crichd-match .server-count { font-size: 11px; color: #4a9eff; margin-top: 6px; }
+    .crichd-match .server-count .live-tag { background: #e00; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: 6px; }
+    .crichd-match.category-card { background: linear-gradient(135deg, #1a2a4a 0%, #252525 100%); border: 2px solid #4a9eff; }
+    .lc-card .match-title { margin-bottom: 0 !important; }
+    .match-section-title { font-size: 16px; font-weight: 700; color: #fff; margin: 12px 0 8px; display: flex; align-items: center; gap: 8px; }
+    .match-card { background: #252525; border: 1px solid #333; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s; }
+    .match-card:hover { border-color: #4a9eff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,158,255,0.15); }
+    .match-card.dimmed { opacity: 0.6; cursor: default; }
+    .match-card.dimmed:hover { border-color: #333; transform: none; box-shadow: none; }
+    .match-title { font-weight: 600; font-size: 14px; color: #fff; margin-bottom: 4px; }
+    .match-league { font-size: 12px; color: #888; margin-bottom: 6px; }
+    .match-time { font-size: 12px; }
+    .status-live { color: #4f4; font-weight: 700; }
+    .status-vod { color: #4a9eff; }
+    .status-scheduled { color: #aaa; }
+    .crichd-loading { text-align: center; padding: 40px; color: #888; }
+    .crichd-error { text-align: center; padding: 20px; color: #f55; background: #2a1a1a; border-radius: 8px; }
+    .crichd-hidden { display: none !important; }
+    
+    /* WWE LIVE Section */
+    .wwe-event { background: linear-gradient(135deg, #2a1a2a 0%, #252525 100%); border: 1px solid #4a2a4a; border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; }
+    .wwe-event:hover { border-color: #e94560; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(233,69,96,0.2); }
+    .wwe-event .event-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 8px; }
+    .wwe-event .event-poster { width: 100%; height: 120px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .wwe-event .event-poster img { width: 100%; height: 100%; object-fit: cover; }
+    .wwe-event .server-count { font-size: 11px; color: #e94560; margin-top: 6px; }
+    .wwe-event .server-count .live-tag { background: #e94560; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: 6px; }
+    .wwe-section-header h2 .live-dot { background: #e94560 !important; }
+    
+    /* Source Tabs */
+    .source-tabs { display: flex; gap: 0; padding: 0; margin: 0; background: #151515; border-bottom: 1px solid #333; }
+    .source-tab { flex: 1; padding: 14px 16px; background: #151515; color: #888; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; text-align: center; }
+    .source-tab:hover { color: #fff; background: #1a1a1a; }
+    .source-tab.active { color: #fff; background: #1a1a1a; border-bottom-color: #4a9eff; }
+    .source-tab[data-source="wwe"].active { border-bottom-color: #e94560; }
+    .source-tab .tab-icon { margin-right: 6px; }
+    
+    /* IPL LIVE 2 Section */
+    .ipl2-event { background: linear-gradient(135deg, #1a2a3a 0%, #252525 100%); border: 1px solid #2a4a6a; border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; }
+    .ipl2-event:hover { border-color: #4a9eff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74,158,255,0.2); }
+    .ipl2-event .event-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 8px; }
+    .ipl2-event .event-poster { width: 100%; height: 100px; background: #1a1a1a; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .ipl2-event .event-poster img { width: 100%; height: 100%; object-fit: cover; }
+    .ipl2-event .server-count { font-size: 11px; color: #4a9eff; margin-top: 6px; }
+    .ipl2-event .server-count .live-tag { background: #4a9eff; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: 6px; }
+    
+    /* Mobile Responsive */
+    @media (max-width: 900px), (max-height: 600px) {
+      .container { flex-direction: column !important; height: auto !important; }
+      .sidebar { width: 100% !important; height: auto !important; max-height: 40vh !important; border-right: none !important; border-bottom: 1px solid #333; }
+      .sidebar { flex: 0 0 auto !important; }
+      .main { width: 100% !important; height: 45vh !important; flex: none !important; }
+      header { padding: 10px; }
+      header h1 { font-size: 16px; }
+      .input-row { flex-wrap: wrap; }
+      .url-input, .load-btn { width: 100%; padding: 14px; font-size: 16px; }
+      #presetSelect { width: 100%; padding: 14px; font-size: 16px; max-width: 100% !important; }
+    }
+
+    /* PiP Mode - hide everything except video */
+    body.pip-mode header, body.pip-mode .sidebar, body.pip-mode .now-playing,
+    body.pip-mode #floatPlayer, body.pip-mode #streamModal, body.pip-mode .float-controls {
+      display: none !important;
+    }
+    body.pip-mode .container { height: 100vh !important; flex-direction: column !important; }
+    body.pip-mode .main { height: 100vh !important; flex: none !important; width: 100% !important; }
+    body.pip-mode .video-wrap { padding: 0 !important; }
+    body.pip-mode #player { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; }
+    body.pip-mode #yonoFrame { width: 100vw !important; height: 100vh !important; }
+      .search-input, .chip { font-size: 16px; padding: 12px; }
+      .ch-name { font-size: 16px; }
+      .ch-country { font-size: 14px; }
+      .channel { padding: 14px; }
+      .logo { width: 40px; height: 40px; }
+      .now-playing { font-size: 14px; padding: 12px; }
+      .search-row, .chips { padding: 10px; }
+      .chip { padding: 8px 14px; font-size: 13px; }
+      .float-player.size-medium { width: 95vw; height: 55vw; max-height: 60vh; }
+      .float-player.size-large { width: 98vw; height: 70vw; }
+      .float-controls { height: 34px; }
+      .float-btn { font-size: 14px; padding: 5px 10px; }
+    }
+
+  </style>
+  <style>.rc{display:inline;}</style>
+</head>
+<body class="crichd-mode">
+  <!-- Floating Player -->
+  <button class="float-toggle-btn" id="floatToggleBtn" onclick="toggleFloatPlayer()">📺</button>
+  <div id="floatCloseBtn" class="float-close-btn" onclick="hideFloat()" style="display:none;">✕</div>
+  <div id="floatPlayer" class="float-player size-medium" style="display:none;">
+    <div class="float-controls">
+      <button class="float-btn" id="floatMuteBtn" onclick="toggleFloatMute()" title="Mute">🔊</button>
+      <span class="float-title" id="floatTitle">Playing</span>
+      <button class="float-btn" onclick="openSizeMenu()" title="Size">📐</button>
+      <button class="float-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+      <button class="float-btn" onclick="floatPip()" title="Picture-in-Picture">🎬</button>
+      <button class="float-btn" onclick="minimizeFloat()" title="Minimize">_</button>
+    </div>
+    <div class="float-drag-handle" id="floatDragHandle">≡</div>
+    <div class="float-resize-handle" id="floatResizeHandle">◢</div>
+    <video id="floatVideo" style="width:100%;height:calc(100% - 30px);background:#000;display:none;" playsinline></video>
+    <iframe id="floatIframe" src=""></iframe>
+    <div class="watermark float-watermark">RKO LIVE</div>
+    <div class="float-size-menu" id="floatSizeMenu">
+      <button onclick="setFloatSize('small')">Small (320×240)</button>
+      <button onclick="setFloatSize('medium')">Medium (640×400)</button>
+      <button onclick="setFloatSize('large')">Large (960×540)</button>
+    </div>
+  </div>
+
+  <header>
+    <h1><img src="/logo2.png" style="height:79px;vertical-align:middle;margin-right:12px;border-radius:8px;" alt="RKO TV"> RKO TV <a href="/download.html" style="background:#4a9eff;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;text-decoration:none;margin-left:5px;">📥 Download App</a></h1>
+    <div class="input-row">
+      <input type="text" class="url-input" id="playlistUrl" placeholder="Paste M3U/M3U8 playlist URL..." />
+      <select id="presetSelect" onchange="loadPreset()" style="padding:10px;background:#333;color:#fff;border:1px solid #444;border-radius:6px;margin-right:5px;max-width:200px;">
+        <option value="">-- Select Source --</option>
+        <option value="__CRICHD__">🏏 RKO LIVE Sports</option>
+        <option value="__IPL_LIVE_2__">🏏 IPL LIVE 2</option>
+        <option value="__CRICHD_PLAYLIST__">📡 CricHD Channels</option>
+        <option value="__STREAM_RKO__">🌐 Stream RKO</option>
+        <option value="__FOOTYSTREAM__">🌍 FootyStream</option>
+        <option value="__LIVE_CHANNELS__">📡 Live Sports Channels</option>
+        <option value="__PREMIUM_CHANNELS__">📺 Premium Channels</option>
+        <option value="__IPL_ADS__">🏏 Watch IPL with Ads</option>
+        <option value="__WWE_LIVE__">🤼 WWE LIVE</option>
+        <option value="__WWE_HIGHLIGHTS__">🎬 WWE Highlights</option>
+        <option value="__ICC_TV__">🏏 ICC TV</option>
+        <option value="https://opentivu.netlify.app/api/it">🇮🇹 Italian TV</option>
+        <option value="https://raw.githubusercontent.com/BuddyChewChew/pluto/main/pluto_us.m3u">📺 Pluto TV USA</option>
+        <option value="https://raw.githubusercontent.com/BuddyChewChew/pluto/main/pluto_all.m3u">🌍 Pluto TV All</option>
+        <option value="https://iptv-org.github.io/iptv/index.m3u">🌍 World IPTV</option>
+        <option value="https://iptv-org.github.io/iptv/categories/sports.m3u">⚽ All Sports</option>
+        <option value="https://iptv-org.github.io/iptv/categories/news.m3u">📰 News</option>
+        <option value="https://iptv-org.github.io/iptv/categories/movies.m3u">🎬 Movies</option>
+        <option value="https://iptv-org.github.io/iptv/categories/kids.m3u">🧒 Kids</option>
+        <option value="https://iptv-org.github.io/iptv/categories/learning.m3u">📚 Education</option>
+        <option value="https://iptv-org.github.io/iptv/countries/us.m3u">🇺🇸 USA</option>
+        <option value="https://iptv-org.github.io/iptv/countries/gb.m3u">🇬🇧 UK</option>
+        <option value="https://iptv-org.github.io/iptv/countries/in.m3u">🇮🇳 India</option>
+        <option value="https://iptv-org.github.io/iptv/countries/np.m3u">🇳🇵 Nepal</option>
+        <option value="https://iptv-org.github.io/iptv/countries/bd.m3u">🇧🇩 Bangladesh</option>
+        <option value="https://iptv-org.github.io/iptv/countries/pk.m3u">🇵🇰 Pakistan</option>
+        <option value="https://iptv-org.github.io/iptv/countries/lk.m3u">🇱🇰 Sri Lanka</option>
+        <option value="https://iptv-org.github.io/iptv/countries/de.m3u">🇩🇪 Germany</option>
+        <option value="https://iptv-org.github.io/iptv/countries/fr.m3u">🇫🇷 France</option>
+        <option value="https://iptv-org.github.io/iptv/countries/es.m3u">🇪🇸 Spain</option>
+        <option value="https://iptv-org.github.io/iptv/countries/it.m3u">🇮🇹 Italy</option>
+        <option value="https://iptv-org.github.io/iptv/countries/au.m3u">🇦🇺 Australia</option>
+        <option value="https://iptv-org.github.io/iptv/countries/ca.m3u">🇨🇦 Canada</option>
+        <option value="https://iptv-org.github.io/iptv/countries/br.m3u">🇧🇷 Brazil</option>
+        <option value="https://iptv-org.github.io/iptv/countries/mx.m3u">🇲🇽 Mexico</option>
+        <option value="https://iptv-org.github.io/iptv/countries/ru.m3u">🇷🇺 Russia</option>
+        <option value="https://iptv-org.github.io/iptv/countries/jp.m3u">🇯🇵 Japan</option>
+        <option value="https://iptv-org.github.io/iptv/countries/kr.m3u">🇰🇷 South Korea</option>
+        <option value="https://iptv-org.github.io/iptv/countries/cn.m3u">🇨🇳 China</option>
+        <option value="https://raw.githubusercontent.com/wwb521/live/main/tv.m3u">🇨🇳 China TV</option>
+      </select>
+      <button class="load-btn" onclick="loadPlaylist()">Load</button>
+    </div>
+  </header>
+
+  <!-- Source Tabs -->
+  <div class="source-tabs">
+    <button class="source-tab active" data-source="crichd" onclick="switchSource('crichd')"><span class="tab-icon">🏏</span> RKO LIVE Sports</button>
+    <button class="source-tab" data-source="livechannels" onclick="switchSource('livechannels')"><span class="tab-icon">📡</span> Live Sports Channels</button>
+    <button class="source-tab" data-source="streamrko" onclick="switchSource('streamrko')"><span class="tab-icon">🌐</span> Stream RKO</button>
+  </div>
+
+  <!-- CricHD Live Sports Section -->
+  <div class="live-section" id="liveSection">
+    <div class="live-section-header">
+      <h2><span class="live-dot"></span> Live Sports</h2>
+      <button class="refresh-btn" id="liveRefreshBtn">↻ Refresh</button>
+    </div>
+    <div id="liveMatchesGrid" class="live-matches-grid"></div>
+  </div>
+
+  <div class="container">
+    <aside class="sidebar">
+      <div class="search-row">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search channels..." />
+      </div>
+      <div class="chips">
+        <div class="chip active" data-cat="all">All</div>
+        <div class="chip" data-cat="sports">Sports</div>
+        <div class="chip" data-cat="news">News</div>
+        <div class="chip" data-cat="movies">Movies</div>
+        <div class="chip" data-cat="music">Music</div>
+        <div class="chip" data-cat="entertainment">Entertainment</div>
+        <div class="chip" data-cat="documentary">Documentary</div>
+      </div>
+      <div class="channels" id="channelList"></div>
+    </aside>
+
+    <main class="main">
+      <div class="now-playing" id="nowPlaying">Select a channel to play</div>
+      <div class="video-wrap">
+        <video id="player" controls preload="auto" playsinline></video>
+        <div class="watermark">RKO LIVE</div>
+      </div>
+    </main>
+  </div>
+  
+  <div class="modal-overlay" id="streamModal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="modalTitle">Streaming Links</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    // Check for stream param to auto-play in popup
+    const urlParams = new URLSearchParams(window.location.search);
+    const streamUrl = urlParams.get('stream');
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      if (streamUrl) {
+        // We're in popup - auto play the stream
+        document.getElementById('floatPlayer').style.display = 'none';
+        document.querySelector('.container').style.height = '100vh';
+        
+        const player = document.getElementById('player');
+        player.style.display = 'block';
+        
+        if (streamUrl.includes('.m3u8')) {
+          if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(player);
+            player.play();
+          }
+        } else {
+          // iframe for non-m3u8 URLs
+          let iframe = document.getElementById('yonoFrame');
+          if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'yonoFrame';
+            iframe.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+            document.querySelector('.video-wrap').appendChild(iframe);
+          }
+          player.style.display = 'none';
+          iframe.style.display = 'block';
+          iframe.src = streamUrl;
+        }
+        
+        document.getElementById('nowPlaying').textContent = 'Playing in Popup';
+      }
+    });
+    
+    // Heartbeat - live user tracking
+    (function(){
+      var sid = '';
+      try { sid = localStorage.getItem('hb_sid') || crypto.randomUUID(); localStorage.setItem('hb_sid', sid); } catch(e) { sid = 'anon_' + Date.now(); }
+      var hbPage = window.location.pathname;
+      function sendHeartbeat(playing) {
+        fetch('/api/heartbeat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ sessionId:sid, page: playing ? hbPage + ' (playing)' : hbPage }) }).catch(function(){});
+      }
+      sendHeartbeat(false);
+      setInterval(function(){ sendHeartbeat(false); }, 30000);
+      var origPlay = HTMLVideoElement.prototype.play;
+      HTMLVideoElement.prototype.play = function() { sendHeartbeat(true); return origPlay.apply(this, arguments); };
+      document.addEventListener('playing', function(){ sendHeartbeat(true); }, true);
+    })();
+
+    const player = document.getElementById('player');
+    const channelListEl = document.getElementById('channelList');
+    const nowPlayingEl = document.getElementById('nowPlaying');
+    const searchInput = document.getElementById('searchInput');
+    const playlistUrlInput = document.getElementById('playlistUrl');
+
+    let allChannels = [];
+    let currentChannel = null;
+
+    function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/`/g,'&#96;').replace(/\${/g,'&#36;&#123;'); }
+let hls = null;
+    let prefetchHls = null;
+    let prefetchPlayer = null;
+    
+    // Prefetch URL for faster load
+    function prefetchUrl(url) {
+      if (url && url.includes('.m3u8') && typeof Hls !== 'undefined') {
+        if (!prefetchPlayer) {
+          prefetchPlayer = document.createElement('video');
+          prefetchPlayer.muted = true;
+          prefetchPlayer.style.display = 'none';
+          document.body.appendChild(prefetchPlayer);
+        }
+        if (prefetchHls) prefetchHls.destroy();
+        prefetchHls = new Hls({fragLoadingMaxRetry: 1, manifestLoadingMaxRetry: 1});
+        prefetchHls.loadSource(url);
+        prefetchHls.attachMedia(prefetchPlayer);
+      }
+    }
+    
+    let activeCategory = 'all';
+    let isLiveMatchesMode = false;
+let cachedMatches = null;
+    let cachedStreamLinks = {};
+    
+    function closeModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('streamModal').classList.remove('show');
+    }
+    
+    function playStream(url) {
+      closeModal();
+      playChannel({ name: 'Live Stream', url: url, group: 'Live' });
+    }
+    
+    function openMatchPage(matchId) {
+      closeModal();
+      // Show buttons to open newsecrettips page
+      const matchUrl = 'https://www.newsecrettips.com/p/match-data.html?id=' + matchId;
+      nowPlayingEl.textContent = 'Opening match page...';
+      
+      // Open in new tab
+      window.open(matchUrl, '_blank');
+      
+      // Also show in iframe
+      player.style.display = 'none';
+      let iframe = document.getElementById('yonoFrame');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'yonoFrame';
+        iframe.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+        iframe.setAttribute('allowfullscreen', '');
+        document.querySelector('.video-wrap').appendChild(iframe);
+      }
+      iframe.src = matchUrl;
+      iframe.style.display = 'block';
+    }
+
+    // CricHD Live Sports
+    let crichdMatches = [];
+
+    async function loadCricHD() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading live matches...</div>';
+
+      try {
+        const [cricRes, footyRes] = await Promise.all([
+          fetch('/api/crichd'),
+          fetch('/api/footystream').then(r => r.json()).catch(() => ({ success: false, events: [] })),
+        ]);
+        const data = await cricRes.json();
+
+        if (!data.success || !data.matches || data.matches.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No live matches found. Try again later.</div>';
+          return;
+        }
+
+        if (footyRes.success && footyRes.events) {
+          initLeagueLookup(footyRes.events);
+        }
+
+        crichdMatches = data.matches;
+        renderCricHDMatches(data.matches);
+        sectionCache['crichd'] = { html: grid.innerHTML, time: Date.now() };
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    const IPL_BASE = 'https://raw.githubusercontent.com/lokeshkrishna3210-prog/IPL-Team-LOGO/main/';
+    const PSL_BASE = 'https://raw.githubusercontent.com/sameerahmed16/sameerpsl/2d498ca3f7004f3f685aeec9be451d5e4c7a4ee8/src/assets/logos/';
+
+    const teamLogos = {
+      'csk': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Chennai-Super-Kings-2.jpg',
+      'chennai super kings': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Chennai-Super-Kings-2.jpg',
+      'mi': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Mumbai-Indians-1.jpg',
+      'mumbai indians': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Mumbai-Indians-1.jpg',
+      'mumbai': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Mumbai-Indians-1.jpg',
+      'mumbai ind': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Mumbai-Indians-1.jpg',
+      'mum': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Mumbai-Indians-1.jpg',
+      'indians': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Mumbai-Indians-1.jpg',
+      'rcb': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Royal-Challenger-Bangalore-2.jpg',
+      'royal challengers bangalore': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Royal-Challenger-Bangalore-2.jpg',
+      'royal challengers bengaluru': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgEMirAmSelGzQqwMqkzMifgCNy9asa4lGjk7tFe7WlVAQ3NU7eGj8nP0c-NRXNY6ZN5FgrDJV0k_UjOLa8rUHJDfEzFsj9qxgL_DxfB0y4RlFli0AnCxNqWXZ9wCATAZ1FBoZafwsUWddYNpVOyBEAxK7yIdLy4OkVjkUMEDErfWKE_54Rt2WW9iXL/s1178/Original%20Royal%20Challengers%20Bangalore%20PNG-SVG%20File%20Download%20Free%20Download.png',
+      'kkr': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Kolkata-Knight-Riders-1.jpg',
+      'kolkata knight riders': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Kolkata-Knight-Riders-1.jpg',
+      'srh': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Sunrisers-Hyderabad-1.jpg',
+      'sunrisers hyderabad': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Sunrisers-Hyderabad-1.jpg',
+      'pbks': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Punjab-Kings-2.jpg',
+      'punjab kings': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Punjab-Kings-2.jpg',
+      'rr': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Rajashtan-Royals-2.jpg',
+      'rajasthan royals': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Rajashtan-Royals-2.jpg',
+      'dc': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Delhi-Capitals-2.jpg',
+      'delhi capitals': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Delhi-Capitals-2.jpg',
+      'gt': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Gujarat-Titans-2.jpg',
+      'gujarat titans': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Gujarat-Titans-2.jpg',
+      'lsg': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Lucknow-Super-Giants-2.jpg',
+      'lucknow super giants': 'https://cdorg.b-cdn.net/wp-content/uploads/2022/03/Cricketdata-IPL-Flag-Lucknow-Super-Giants-2.jpg',
+      'isl': PSL_BASE + 'islamabad-united.png',
+      'islamabad united': PSL_BASE + 'islamabad-united.png',
+      'islamabad': PSL_BASE + 'islamabad-united.png',
+      'kk': PSL_BASE + 'karachi-kings.png',
+      'karachi kings': PSL_BASE + 'karachi-kings.png',
+      'karachi': PSL_BASE + 'karachi-kings.png',
+      'kar': PSL_BASE + 'karachi-kings.png',
+      'laq': PSL_BASE + 'lahore-qalandars.png',
+      'lahore qalandars': PSL_BASE + 'lahore-qalandars.png',
+      'lahore': PSL_BASE + 'lahore-qalandars.png',
+      'lq': PSL_BASE + 'lahore-qalandars.png',
+      'qalandars': PSL_BASE + 'lahore-qalandars.png',
+      'ms': PSL_BASE + 'multan-sultans.png',
+      'multan sultans': PSL_BASE + 'multan-sultans.png',
+      'multan': PSL_BASE + 'multan-sultans.png',
+      'sultans': PSL_BASE + 'multan-sultans.png',
+      'pez': PSL_BASE + 'peshawar-zalmi.png',
+      'peshawar zalmi': PSL_BASE + 'peshawar-zalmi.png',
+      'peshawar': PSL_BASE + 'peshawar-zalmi.png',
+      'pz': PSL_BASE + 'peshawar-zalmi.png',
+      'zalmi': PSL_BASE + 'peshawar-zalmi.png',
+      'que': PSL_BASE + 'quetta-gladiators.png',
+      'quetta gladiators': PSL_BASE + 'quetta-gladiators.png',
+      'quetta': PSL_BASE + 'quetta-gladiators.png',
+      'qg': PSL_BASE + 'quetta-gladiators.png',
+      'gladiators': PSL_BASE + 'quetta-gladiators.png',
+      'rwp': PSL_BASE + 'rawalpindi-pindiz.png',
+      'rawalpindi pindiz': PSL_BASE + 'rawalpindi-pindiz.png',
+      'rawalpindi': PSL_BASE + 'rawalpindi-pindiz.png',
+      'pindiz': PSL_BASE + 'rawalpindi-pindiz.png',
+      'hhk': PSL_BASE + 'hyderabad-kingsmen.png',
+      'hyderabad kingsmen': PSL_BASE + 'hyderabad-kingsmen.png',
+      'kingsmen': PSL_BASE + 'hyderabad-kingsmen.png',
+    };
+
+    const countryFlags = {
+      'india': 'https://r2.thesportsdb.com/images/media/team/badge/donl7g1646775159.png',
+      'pak': 'https://r2.thesportsdb.com/images/media/team/badge/03o8241646775177.png',
+      'pakistan': 'https://r2.thesportsdb.com/images/media/team/badge/03o8241646775177.png',
+      'aus': 'https://r2.thesportsdb.com/images/media/team/badge/zvm8581646775132.png',
+      'australia': 'https://r2.thesportsdb.com/images/media/team/badge/zvm8581646775132.png',
+      'eng': 'https://r2.thesportsdb.com/images/media/team/badge/y5wcl81646775152.png',
+      'england': 'https://r2.thesportsdb.com/images/media/team/badge/y5wcl81646775152.png',
+      'nz': 'https://r2.thesportsdb.com/images/media/team/badge/1yyh9s1646775166.png',
+      'new zealand': 'https://r2.thesportsdb.com/images/media/team/badge/1yyh9s1646775166.png',
+      'sl': 'https://r2.thesportsdb.com/images/media/team/badge/i5fqg01646775193.png',
+      'sri lanka': 'https://r2.thesportsdb.com/images/media/team/badge/i5fqg01646775193.png',
+      'sa': 'https://r2.thesportsdb.com/images/media/team/badge/hn47e51646775185.png',
+      'south africa': 'https://r2.thesportsdb.com/images/media/team/badge/hn47e51646775185.png',
+      'ban': 'https://r2.thesportsdb.com/images/media/team/badge/j74o4t1646775146.png',
+      'bangladesh': 'https://r2.thesportsdb.com/images/media/team/badge/j74o4t1646775146.png',
+      'wi': 'https://r2.thesportsdb.com/images/media/team/badge/1x0a681646775209.png',
+      'west indies': 'https://r2.thesportsdb.com/images/media/team/badge/1x0a681646775209.png',
+      'afg': 'https://r2.thesportsdb.com/images/media/team/badge/bzu3v71646775261.png',
+      'afghanistan': 'https://r2.thesportsdb.com/images/media/team/badge/bzu3v71646775261.png',
+      'zim': 'https://r2.thesportsdb.com/images/media/team/badge/7ah0831646775278.png',
+      'zimbabwe': 'https://r2.thesportsdb.com/images/media/team/badge/7ah0831646775278.png',
+      'ire': 'https://r2.thesportsdb.com/images/media/team/badge/wlryed1646775269.png',
+      'ireland': 'https://r2.thesportsdb.com/images/media/team/badge/wlryed1646775269.png',
+      'nepal': 'https://r2.thesportsdb.com/images/media/team/badge/bn5wrv1646775335.png',
+      'usa': 'https://r2.thesportsdb.com/images/media/team/badge/abmnzg1583580897.png',
+      'united states': 'https://r2.thesportsdb.com/images/media/team/badge/abmnzg1583580897.png',
+      'oman': 'https://r2.thesportsdb.com/images/media/team/badge/5ybzn71625862595.png',
+      'scotland': 'https://r2.thesportsdb.com/images/media/team/badge/78woeh1646775360.png',
+      'netherlands': 'https://r2.thesportsdb.com/images/media/team/badge/7sopvo1646775350.png',
+      'canada': 'https://r2.thesportsdb.com/images/media/team/badge/t9akr51646775392.png',
+      'namibia': 'https://r2.thesportsdb.com/images/media/team/badge/5jnoek1646775341.png',
+      'png': 'https://r2.thesportsdb.com/images/media/team/badge/c9ubsm1583612695.png',
+      'papua new guinea': 'https://r2.thesportsdb.com/images/media/team/badge/c9ubsm1583612695.png',
+      'uganda': 'https://r2.thesportsdb.com/images/media/team/badge/93lqbb1646775370.png',
+      'jersey': 'https://r2.thesportsdb.com/images/media/team/badge/72uy2h1646775379.png',
+      'malta': 'https://flagcdn.com/48x36/mt.png',
+      'slovenia': 'https://flagcdn.com/48x36/si.png',
+      'cyprus': 'https://flagcdn.com/48x36/cy.png',
+      'croatia': 'https://flagcdn.com/48x36/hr.png',
+      'sweden': 'https://flagcdn.com/48x36/se.png',
+      'france': 'https://flagcdn.com/48x36/fr.png',
+      'switzerland': 'https://flagcdn.com/48x36/ch.png',
+      'guernsey': 'https://flagcdn.com/48x36/gg.png',
+      'austria': 'https://flagcdn.com/48x36/at.png',
+      'germany': 'https://flagcdn.com/48x36/de.png',
+      'italy': 'https://flagcdn.com/48x36/it.png',
+      'spain': 'https://flagcdn.com/48x36/es.png',
+      'portugal': 'https://flagcdn.com/48x36/pt.png',
+      'denmark': 'https://flagcdn.com/48x36/dk.png',
+      'norway': 'https://flagcdn.com/48x36/no.png',
+      'finland': 'https://flagcdn.com/48x36/fi.png',
+      'belgium': 'https://flagcdn.com/48x36/be.png',
+      'japan': 'https://flagcdn.com/48x36/jp.png',
+      'kenya': 'https://flagcdn.com/48x36/ke.png',
+      'tanzania': 'https://flagcdn.com/48x36/tz.png',
+      'nigeria': 'https://flagcdn.com/48x36/ng.png',
+      'botswana': 'https://flagcdn.com/48x36/bw.png',
+      'ghana': 'https://flagcdn.com/48x36/gh.png',
+      'sierra leone': 'https://flagcdn.com/48x36/sl.png',
+      'malawi': 'https://flagcdn.com/48x36/mw.png',
+      'rwanda': 'https://flagcdn.com/48x36/rw.png',
+      'lesotho': 'https://flagcdn.com/48x36/ls.png',
+      'seychelles': 'https://flagcdn.com/48x36/sc.png',
+      'mozambique': 'https://flagcdn.com/48x36/mz.png',
+      'gambia': 'https://flagcdn.com/48x36/gm.png',
+      'cayman islands': 'https://flagcdn.com/48x36/ky.png',
+      'bermuda': 'https://flagcdn.com/48x36/bm.png',
+      'bahamas': 'https://flagcdn.com/48x36/bs.png',
+      'argentina': 'https://flagcdn.com/48x36/ar.png',
+      'brazil': 'https://flagcdn.com/48x36/br.png',
+      'chile': 'https://flagcdn.com/48x36/cl.png',
+      'costa rica': 'https://flagcdn.com/48x36/cr.png',
+      'mexico': 'https://flagcdn.com/48x36/mx.png',
+      'panama': 'https://flagcdn.com/48x36/pa.png',
+      'hong kong': 'https://flagcdn.com/48x36/hk.png',
+      'malaysia': 'https://flagcdn.com/48x36/my.png',
+      'singapore': 'https://flagcdn.com/48x36/sg.png',
+      'thailand': 'https://flagcdn.com/48x36/th.png',
+      'indonesia': 'https://flagcdn.com/48x36/id.png',
+      'philippines': 'https://flagcdn.com/48x36/ph.png',
+      'china': 'https://flagcdn.com/48x36/cn.png',
+      'south korea': 'https://flagcdn.com/48x36/kr.png',
+      'qatar': 'https://flagcdn.com/48x36/qa.png',
+      'kuwait': 'https://flagcdn.com/48x36/kw.png',
+      'bahrain': 'https://flagcdn.com/48x36/bh.png',
+      'saudi arabia': 'https://flagcdn.com/48x36/sa.png',
+      'nepal flag': 'https://flagcdn.com/48x36/np.png',
+    };
+
+    function getTeamLogoHtml(teamName) {
+      if (!teamName) return '';
+      const key = teamName.toLowerCase().trim()
+        .replace(/^(1st|2nd|3rd|4th)\s+(semi-)?final\s*[:.-]?\s*/i, '')
+        .replace(/^(super\s+)?final\s*[:.-]?\s*/i, '')
+        .replace(/^\d+\w*\s+match\s*[:.-]?\s*/i, '')
+        .replace(/\s*[,–-]\s*\d+\w*\s+match\s*/gi, '')
+        .replace(/\s*\(.*?\)\s*/g, '')
+        .replace(/\s*-\s*.*$/i, '')
+        .trim();
+      
+      if (countryFlags[key]) {
+        return `<img src="${countryFlags[key]}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.outerHTML='<span style=\\'display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;\\'>🏏 ${teamName}</span>'">`;
+      }
+
+      let logoUrl = teamLogos[key];
+      if (!logoUrl) {
+        let bestTeam = null;
+        let bestTeamLen = 0;
+        for (const [name, url] of Object.entries(teamLogos)) {
+          if (key.includes(name) && name.length > bestTeamLen) {
+            bestTeam = url;
+            bestTeamLen = name.length;
+          }
+          if (name.includes(key)) {
+            bestTeam = url;
+            break;
+          }
+        }
+        if (bestTeam) logoUrl = bestTeam;
+      }
+      
+      if (!logoUrl) {
+        for (const [name, url] of Object.entries(countryFlags)) {
+          if (key.includes(name) || name.includes(key)) {
+            logoUrl = url;
+            break;
+          }
+        }
+      }
+      
+      if (logoUrl) {
+        return `<img src="${logoUrl}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.outerHTML='<span style=\\'display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;\\'>🏏 ${teamName}</span>'">`;
+      }
+      return `<span style="display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;">🏏 ${teamName}</span>`;
+    }
+
+    function parseMatchTitle(title) {
+      const parts = title.split(/\s+vs\s+|\s+v\s+/i);
+      if (parts.length >= 2) {
+        let t1 = parts[0].trim();
+        let t2 = parts.slice(1).join(' vs ').trim();
+        // Strip prefixes like "56th Match:", "1st Test:", "Final:", etc.
+        t1 = t1.replace(/^[\d]+\w*\s+(match|test|odi|t20|final|semi)\s*[:.-]?\s*/i, '').trim();
+        t2 = t2.replace(/^[\d]+\w*\s+(match|test|odi|t20|final|semi)\s*[:.-]?\s*/i, '').trim();
+        return { team1: t1, team2: t2, isVs: true };
+      }
+      return { team1: title, team2: '', isVs: false };
+    }
+
+    function formatLiveNow(day, time) {
+      let cleanTime = time.replace(/IST\+?\d*(:\d*)?/gi, '').trim();
+      let parts = cleanTime.match(/(\d+):(\d+)(?:\s*(AM|PM))?/i);
+      if (parts) {
+        let h = parseInt(parts[1]), m = parseInt(parts[2]);
+        let a = (parts[3]||'').toUpperCase();
+        if (a==='PM' && h<12) h+=12;
+        if (a==='AM' && h===12) h=0;
+        let d = new Date();
+        d.setUTCHours(h,m,0,0);
+        return `<span class="live-elapsed" data-utc="${d.getTime()}"></span>`;
+      }
+      return time || '';
+    }
+
+    function formatMatchTime(time, day, isLive) {
+      let raw = time || '';
+      let isToday = day === 'Today' || day.includes('Today');
+      let isTomorrow = day === 'Tomorrow' || day.includes('Tomorrow');
+      
+      if (isToday && isLive) return formatLiveNow(day, time);
+      
+      // Remove IST/IST+5:30 etc from string
+      let cleanTime = raw.replace(/IST\+?\d*(:\d*)?/gi, '').trim();
+      if (!cleanTime) return raw;
+      
+      try {
+        // Parse HH:MM (24h) or HH:MM AM/PM (12h)
+        let parts = cleanTime.match(/(\d+):(\d+)(?:\s*(AM|PM))?/i);
+        if (!parts) return raw;
+        
+        let hours = parseInt(parts[1]);
+        let minutes = parseInt(parts[2]);
+        let ampm = (parts[3] || '').toUpperCase();
+        
+        if (ampm === 'PM' && hours < 12) hours += 12;
+        if (ampm === 'AM' && hours === 12) hours = 0;
+        
+        // Times from CricHD are in UTC (GMT+0)
+        let d = new Date();
+        if (isTomorrow) d.setDate(d.getDate() + 1);
+        if (!isToday && !isTomorrow && day) {
+          const dateParts = day.match(/(\d+)-(\d+)-(\d+)/);
+          if (dateParts) {
+            d = new Date(Date.UTC(dateParts[3], dateParts[2] - 1, dateParts[1]));
+            // Check if parsed date is actually today
+            const now = new Date();
+            if (d.getUTCFullYear() === now.getUTCFullYear() && d.getUTCMonth() === now.getUTCMonth() && d.getUTCDate() === now.getUTCDate()) {
+              isToday = true;
+            } else if (isLive) {
+              // Past-date channel-list entry with isLive → no time display
+              return '';
+            }
+          }
+        }
+        d.setUTCHours(hours, minutes, 0, 0);
+        const matchUtc = d.getTime(); // epoch timestamp for countdown
+        
+        // If match time has passed and it's today, show LIVE
+        if (isToday && Date.now() >= matchUtc) return formatLiveNow(day, time);
+        
+        d.setUTCMinutes(d.getUTCMinutes() + 345); // +5:45 for NPT display
+        
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const dayNum = d.getUTCDate();
+        const month = months[d.getUTCMonth()];
+        const dateStr = dayNum + ' ' + month;
+        
+        const nptHours = d.getUTCHours();
+        const nptMinutes = d.getUTCMinutes();
+        const nptAmpm = nptHours >= 12 ? 'PM' : 'AM';
+        const displayHours = nptHours % 12 || 12;
+        const displayMinutes = String(nptMinutes).padStart(2, '0');
+        
+        if (isToday || isTomorrow) {
+          const label = isToday ? 'Starts in ' : '';
+          return `<span class="cd-wrapper">${label ? '<span class="cd-label">Starts in </span>' : ''}<span class="countdown-timer" data-utc="${matchUtc}"></span></span>`;
+        }
+        return `${displayHours}:${displayMinutes} ${nptAmpm} NPT • ${dateStr}`;
+      } catch (e) {
+        return raw;
+      }
+    }
+
+    function renderMatchTitleWithLogos(title) {
+      const parsed = parseMatchTitle(title);
+      if (parsed.isVs) {
+        return `<div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${getTeamLogoHtml(parsed.team1)}<span style="font-size:11px;color:#ccc;font-weight:600;">${parsed.team1.toUpperCase()}</span></div>
+          <span style="color:#4a9eff;font-weight:bold;font-size:16px;">VS</span>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${getTeamLogoHtml(parsed.team2)}<span style="font-size:11px;color:#ccc;font-weight:600;">${parsed.team2.toUpperCase()}</span></div>
+        </div>`;
+      }
+      return title;
+    }
+
+    let leagueLookup = null;
+
+    function initLeagueLookup(events) {
+      leagueLookup = {};
+      for (const e of events) {
+        const teams = (e.teams || []).map(t => t.toLowerCase().trim()).filter(Boolean);
+        if (teams.length >= 2 && e.league) {
+          const key = teams.slice().sort().join('::');
+          if (!leagueLookup[key]) leagueLookup[key] = e.league;
+        }
+      }
+    }
+
+    function enrichLeague(title, league) {
+      const l = (league || '').trim().toLowerCase();
+      const t = (title || '').toLowerCase();
+      if (leagueLookup) {
+        const parsed = parseMatchTitle(title);
+        if (parsed.isVs) {
+          const t1 = parsed.team1.toLowerCase().trim();
+          const t2 = parsed.team2.toLowerCase().trim();
+          const key = [t1, t2].sort().join('::');
+          if (leagueLookup[key]) return leagueLookup[key];
+          for (const [k, v] of Object.entries(leagueLookup)) {
+            const teams = k.split('::');
+            if ((teams.some(t => t1.includes(t) || t.includes(t1))) && (teams.some(t => t2.includes(t) || t.includes(t2)))) {
+              return v;
+            }
+          }
+        }
+      }
+      if (t.includes('test')) return 'International Test Match';
+      const iccLeague2 = ['nepal', 'usa', 'united states', 'oman', 'namibia', 'netherlands', 'scotland', 'uae', 'canada', 'papua new guinea', 'png'];
+      if (iccLeague2.filter(n => t.includes(n)).length >= 2) return 'ICC CWC League 2';
+      if (!l || l === 'cricket' || l === 'cricket match') return league || 'Cricket Match';
+      return league;
+    }
+
+    function canShowLive(match) {
+      if (!match.isLive) return false;
+      const day = (match.day||'').trim();
+      if (day === 'Today' || day.includes('Today') || day === 'Tomorrow' || day.includes('Tomorrow')) return true;
+      const dateParts = day.match(/(\d+)-(\d+)-(\d+)/);
+      if (dateParts) {
+        const d = new Date(Date.UTC(dateParts[3], dateParts[2] - 1, dateParts[1]));
+        const now = new Date();
+        if (d.getUTCFullYear() === now.getUTCFullYear() && d.getUTCMonth() === now.getUTCMonth() && d.getUTCDate() === now.getUTCDate()) return true;
+        // Past dates with isLive should not show badge
+        return false;
+      }
+      // If day is empty or unparseable, trust isLive flag
+      return true;
+    }
+
+    function renderCricHDMatches(matches) {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '';
+
+      matches.forEach(match => {
+        const div = document.createElement('div');
+        const isCategory = !/\b(vs|v)\b/i.test(match.title);
+
+        const enrichedLeague = enrichLeague(match.title, match.league);
+        const leagueLower = enrichedLeague.toLowerCase();
+
+        if (isCategory) {
+          const isIpl = leagueLower.includes('ipl');
+          div.className = 'crichd-match category-card';
+          div.onclick = () => openCricHDMatch(match);
+          div.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;">
+              ${isIpl ? '<img src="https://r2.thesportsdb.com/images/media/league/badge/gaiti11741709844.png" style="height:48px;width:auto;object-fit:contain;" onerror="this.style.display=\'none\'">' : ''}
+              <div style="font-size:14px;font-weight:700;color:#fff;text-align:center;">${match.title}</div>
+              <div style="font-size:11px;color:#4a9eff;text-align:center;">${enrichedLeague}</div>
+              <div style="font-size:10px;color:#888;">Click to view all matches →</div>
+            </div>
+          `;
+          grid.appendChild(div);
+          return;
+        }
+
+        div.className = 'crichd-match';
+        div.onclick = () => openCricHDMatch(match);
+
+        const titleHtml = renderMatchTitleWithLogos(match.title);
+        const leagueLogo = leagueLower.includes('ipl')
+          ? '<img src="https://r2.thesportsdb.com/images/media/league/badge/gaiti11741709844.png/medium" style="height:50px;width:46px;object-fit:contain;vertical-align:middle;margin-right:6px;" onerror="this.style.display=\'none\'">'
+          : leagueLower.includes('psl') || leagueLower.includes('pakistan super')
+          ? '<img src="https://r2.thesportsdb.com/images/media/league/badge/4xo0kt1709121687.png/medium" style="height:36px;width:36px;object-fit:contain;vertical-align:middle;margin-right:6px;" onerror="this.style.display=\'none\'">'
+          : '';
+
+        const showLive = canShowLive(match);
+
+        div.innerHTML = `
+          <div class="match-title" style="text-align:center;">${titleHtml}</div>
+          <div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;">${leagueLogo}${enrichedLeague} • ${formatMatchTime(match.time, match.day, match.isLive)}</div>
+          <div class="server-count" style="text-align:center;">${showLive ? '<span class="live-tag">LIVE</span>' : 'UPCOMING'}</div>
+        `;
+
+        grid.appendChild(div);
+      });
+    }
+
+    async function openCricHDMatch(match) {
+      currentMatch = match;
+      const modal = document.getElementById('streamModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+
+      modalTitle.textContent = match.title;
+      modalBody.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Extracting RKO LIVE streams...</div>';
+      modal.classList.add('show');
+
+      try {
+        const res = await fetch(`/api/crichd?action=servers&matchUrl=${encodeURIComponent(match.pageUrl || match.url)}`);
+        const data = await res.json();
+
+        if (!data.success || !data.servers || data.servers.length === 0) {
+          modalBody.innerHTML = `
+            <div class="crichd-error">RKO LIVE hasn't posted streams for this match yet.</div>
+            <button onclick="retryCricHDMatch('${esc(match.pageUrl || match.url)}', '${esc(match.title)}')" style="margin-top:12px;background:#4a9eff;border:none;color:#fff;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;">🔄 Refresh</button>
+          `;
+          return;
+        }
+
+        const channelLogos = {
+          'sky': { name: 'Sky Sports', logo: 'https://i.imgur.com/pTWblYk.png' },
+          'willow': { name: 'Willow TV', logo: 'https://i.imgur.com/MzxqTMf.png' },
+          'star': { name: 'Star Sports', logo: 'https://i.imgur.com/Js5Eg2V.png' },
+          'hindi': { name: 'Star Sports Hindi', logo: 'https://i.imgur.com/Js5Eg2V.png' },
+          't10': { name: 'T10 Cricket', logo: 'https://r2.thesportsdb.com/images/media/team/badge/4tzmfa1647445839.png/medium' },
+        };
+
+        function getServerInfo(server, idx) {
+          const name = (server.name + ' ' + server.url).toLowerCase();
+          let info = { name: server.name || `Stream ${idx + 1}`, logo: '' };
+          
+          for (const [key, val] of Object.entries(channelLogos)) {
+            if (name.includes(key)) {
+              info = { name: val.name, logo: val.logo };
+              break;
+            }
+          }
+          
+          return info;
+        }
+
+        let linksHtml = '<div style="margin-bottom:12px;font-size:13px;color:#888;">Extracted from RKO LIVE:</div>';
+        data.servers.forEach((server, i) => {
+          const info = getServerInfo(server, i);
+          const logoHtml = info.logo ? `<img src="${info.logo}" style="height:28px;margin-right:8px;vertical-align:middle;border-radius:4px;" onerror="this.style.display='none'">` : '';
+          linksHtml += `
+            <div class="stream-link" onclick="playCricHDUrl('${esc(server.url)}', '${esc(match.title)}');closeModal();" onmouseenter="prefetchStream('${esc(server.url)}')">
+              <div class="name">${logoHtml}<span style="margin-left:4px;">${info.name}</span></div>
+              <div class="quality">Extract & Play</div>
+            </div>
+          `;
+        });
+
+        modalBody.innerHTML = linksHtml;
+      } catch (err) {
+        modalBody.innerHTML = `
+          <div class="crichd-error">Failed to contact RKO LIVE.</div>
+          <button onclick="retryCricHDMatch('${esc(match.pageUrl || match.url)}', '${esc(match.title)}')" style="margin-top:12px;background:#4a9eff;border:none;color:#fff;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;">🔄 Retry</button>
+        `;
+      }
+    }
+
+    function retryCricHDMatch(url, title) {
+      openCricHDMatch({ pageUrl: url, url: url, title: title });
+    }
+
+    function renderLiveMatches() {
+      channelListEl.innerHTML = '<div style="padding:20px;text-align:center;">No live matches available</div>';
+    }
+
+    // Stream RKO - Live events from streamfree.app
+    let streamRKOEvents = [];
+
+    function formatStreamRKOTime(timestamp) {
+      const now = Math.floor(Date.now() / 1000);
+      const diff = timestamp - now;
+      if (diff <= 540) return { display: '🔴 LIVE', isLive: true };
+      if (diff < 0) return { display: '🔴 LIVE', isLive: true };
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const d = new Date(timestamp * 1000);
+      const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return { display: `${timeStr} (in ${h}h ${m}m)`, isLive: false };
+    }
+
+    async function loadCricHDPlaylist() {
+      channelListEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading CricHD channels...</div>';
+
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/abusaeeidx/CricHd-playlists-Auto-Update-permanent/refs/heads/main/api.json');
+        const channels = await res.json();
+
+        if (!channels || channels.length === 0) {
+          channelListEl.innerHTML = '<div class="crichd-error">No channels found.</div>';
+          return;
+        }
+
+        allChannels = channels.map(ch => ({
+          name: ch.name,
+          url: `/api/hls-proxy?url=${encodeURIComponent(ch.link)}&referer=${encodeURIComponent(ch.referer || 'https://executeandship.com/')}&origin=${encodeURIComponent(ch.origin || 'https://executeandship.com')}`,
+          logo: ch.logo || '',
+          group: ch.name.includes('Sports') || ch.name.includes('Cricket') || ch.name.includes('Willow') || ch.name.includes('Star') || ch.name.includes('Ten') || ch.name.includes('PTV') || ch.name.includes('A Sports') || ch.name.includes('Fox') || ch.name.includes('Sony') || ch.name.includes('Astro') ? 'Cricket' : 'Sports',
+        }));
+
+        // Render manually with floating player click handler (same as Stream RKO for app)
+        channelListEl.innerHTML = '';
+        allChannels.forEach(ch => {
+          const div = document.createElement('div');
+          div.className = 'channel';
+          const logoDiv = document.createElement('div');
+          logoDiv.className = 'logo';
+          if (ch.logo) {
+            const img = document.createElement('img');
+            img.src = ch.logo;
+            img.onerror = () => { logoDiv.innerHTML = '<span style="font-size:24px;">📺</span>'; };
+            logoDiv.appendChild(img);
+          } else {
+            logoDiv.innerHTML = '<span style="font-size:24px;">📺</span>';
+          }
+          const infoDiv = document.createElement('div');
+          infoDiv.className = 'ch-info';
+          infoDiv.innerHTML = `<div class="ch-name">${ch.name}</div><div class="ch-country">${ch.group}</div>`;
+          div.appendChild(logoDiv);
+          div.appendChild(infoDiv);
+          div.onclick = () => {
+            popOutStreamRKO(ch.url, ch.name);
+            nowPlayingEl.innerHTML = ch.name;
+          };
+          channelListEl.appendChild(div);
+        });
+      } catch (err) {
+        channelListEl.innerHTML = '<div class="crichd-error">Error loading channels: ' + err.message + '</div>';
+      }
+    }
+
+    async function loadICC() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading ICC TV...</div>';
+      try {
+        const res = await fetch('/api/icc');
+        const data = await res.json();
+        if (!data.matches || data.matches.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No ICC matches found.</div>';
+          return;
+        }
+        const live = data.matches.filter(m => m.status === 'Live');
+        const upcoming = data.matches.filter(m => m.status === 'Scheduled');
+        const replays = data.matches.filter(m => m.status === 'OnDemand' && m.streamUrl);
+        let html = '';
+        if (live.length) {
+          html += '<div class="match-section-title"><span class="live-dot"></span> Live Now</div><div class="matches-grid">';
+          live.forEach(m => { html += renderICCMatch(m, true); });
+          html += '</div>';
+        }
+        if (upcoming.length) {
+          html += '<div class="match-section-title" style="margin-top:16px;">📅 Upcoming</div><div class="matches-grid">';
+          upcoming.slice(0, 10).forEach(m => { html += renderICCMatch(m, false); });
+          html += '</div>';
+        }
+        if (replays.length) {
+          html += '<div class="match-section-title" style="margin-top:16px;">📺 Highlights & Replays</div><div class="matches-grid">';
+          replays.slice(0, 12).forEach(m => { html += renderICCMatch(m, false); });
+          html += '</div>';
+        }
+        grid.innerHTML = html || '<div class="crichd-error">No ICC content available.</div>';
+      } catch (err) {
+        grid.innerHTML = '<div class="crichd-error">Failed to load ICC: ' + err.message + '</div>';
+      }
+    }
+
+    function renderICCMatch(m, isLive) {
+      const title = m.teamA && m.teamB ? m.teamA + ' vs ' + m.teamB : m.title;
+      const sub = [m.matchType, m.seriesName].filter(Boolean).join(' · ');
+      const time = m.startTime ? new Date(m.startTime).toLocaleString() : '';
+      const statusClass = isLive ? 'status-live' : (m.status === 'OnDemand' ? 'status-vod' : 'status-scheduled');
+      const statusText = isLive ? 'LIVE' : (m.status === 'OnDemand' ? '▶ Watch' : time);
+      const clickHandler = m.streamUrl ? `playICCVideo('${m.streamUrl.replace(/'/g, "\\'")}', '${title.replace(/'/g, "\\'")}')` : '';
+      const logoHtml = getTeamLogoHtml(m.teamA) + getTeamLogoHtml(m.teamB);
+      return '<div class="match-card' + (m.streamUrl ? '' : ' dimmed') + '"' + (clickHandler ? ' onclick="' + clickHandler + '"' : '') + '>' +
+        (logoHtml ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' + logoHtml + '</div>' : '') +
+        '<div class="match-title">' + esc(title) + '</div>' +
+        (sub ? '<div class="match-league">' + esc(sub) + '</div>' : '') +
+        '<div class="match-time"><span class="' + statusClass + '">' + statusText + '</span></div></div>';
+    }
+
+    function playICCVideo(url, title) {
+      if (url.includes('.mp4') || url.includes('.m3u8')) {
+        showFloatPlayer(url, title, true);
+      } else {
+        showFloatPlayer(url, title);
+      }
+    }
+
+    async function loadStreamRKO() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading Stream RKO events...</div>';
+
+      try {
+        const res = await fetch('/api/streamfree');
+        const data = await res.json();
+
+        if (!data.success || !data.events || data.events.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No events found. Try again later.</div>';
+          return;
+        }
+
+        streamRKOEvents = data.events;
+        renderStreamRKOEvents(data.events);
+        sectionCache['streamrko'] = { html: grid.innerHTML, time: Date.now() };
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function renderStreamRKOEvents(events) {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '';
+
+      events.forEach(event => {
+        const div = document.createElement('div');
+        div.className = 'crichd-match';
+        div.onclick = () => openStreamRKOMatch(event);
+
+        const timeInfo = formatStreamRKOTime(event.matchTimestamp);
+
+        let teamHtml = '';
+        if (event.team1 && event.team2) {
+          const t1Logo = event.team1.logo ? `<img src="${event.team1.logo}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.outerHTML='<span style=\\'display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;\\'>🎯 ${event.team1.name}</span>'">` : `<span style="display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;">🎯 ${event.team1.name}</span>`;
+          const t1Name = `<span style="font-size:11px;color:#ccc;font-weight:600;">${event.team1.name.toUpperCase()}</span>`;
+          const t2Logo = event.team2.logo ? `<img src="${event.team2.logo}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.outerHTML='<span style=\\'display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;\\'>🎯 ${event.team2.name}</span>'">` : `<span style="display:inline-flex;align-items:center;gap:4px;background:#444;color:#fff;padding:3px 8px;border-radius:6px;font-size:13px;font-weight:600;">🎯 ${event.team2.name}</span>`;
+          const t2Name = `<span style="font-size:11px;color:#ccc;font-weight:600;">${event.team2.name.toUpperCase()}</span>`;
+          teamHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${t1Logo}${t1Name}</div>
+            <span style="color:#4a9eff;font-weight:bold;font-size:16px;">VS</span>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${t2Logo}${t2Name}</div>
+          </div>`;
+        } else {
+          teamHtml = `<div style="font-weight:700;font-size:14px;color:#fff;text-align:center;">${event.name}</div>`;
+        }
+
+        div.innerHTML = `
+          <div class="match-title" style="text-align:center;">${teamHtml}</div>
+          <div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;">${event.league} • ${timeInfo.display}</div>
+          <div class="server-count" style="text-align:center;">${timeInfo.isLive ? '<span class="live-tag">LIVE</span>' : 'UPCOMING'} <span style="color:#888;font-size:11px;margin-left:6px;">👁 ${event.viewers}</span></div>
+        `;
+
+        grid.appendChild(div);
+      });
+    }
+
+    function renderLiveChannels(channels, useGrid) {
+      if (useGrid) {
+        const grid = document.getElementById('liveMatchesGrid');
+        grid.innerHTML = '';
+        channels.forEach(ch => {
+          const div = document.createElement('div');
+          div.className = 'crichd-match lc-card';
+          div.onclick = () => { popOutStreamRKO(ch.url, ch.name); nowPlayingEl.innerHTML = ch.name; };
+          const parsed = parseMatchTitle(ch.name);
+          const isMatch = parsed && parsed.isVs;
+          let innerHtml;
+          if (isMatch) {
+            innerHtml = renderMatchTitleWithLogos(ch.name);
+          } else {
+            const logoHtml = ch.logo
+              ? `<img src="${ch.logo}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.outerHTML='<span style=\\'font-size:32px;\\'>📺</span>'">`
+              : '<span style="font-size:32px;">📺</span>';
+            innerHtml = `
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                ${logoHtml}
+                <div class="match-title">${ch.name}</div>
+              </div>
+            `;
+          }
+          div.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              ${innerHtml}
+              <div style="font-size:11px;color:#888;">${ch.group}</div>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+      } else {
+        channelListEl.innerHTML = '';
+        channels.forEach(ch => {
+          const div = document.createElement('div');
+          div.className = 'channel';
+          const logoDiv = document.createElement('div');
+          logoDiv.className = 'logo';
+          if (ch.logo) {
+            const img = document.createElement('img');
+            img.src = ch.logo;
+            img.onerror = () => { logoDiv.innerHTML = '<span style="font-size:24px;">📺</span>'; };
+            logoDiv.appendChild(img);
+          } else {
+            logoDiv.innerHTML = '<span style="font-size:24px;">📺</span>';
+          }
+          const infoDiv = document.createElement('div');
+          infoDiv.className = 'ch-info';
+          infoDiv.innerHTML = `<div class="ch-name">${ch.name}</div><div class="ch-country">${ch.group}</div>`;
+          div.appendChild(logoDiv);
+          div.appendChild(infoDiv);
+          div.onclick = () => {
+            popOutStreamRKO(ch.url, ch.name);
+            nowPlayingEl.innerHTML = ch.name;
+          };
+          channelListEl.appendChild(div);
+        });
+      }
+    }
+
+    // Live Sports Channels from srhady/crichd-speical-live-event
+    let liveChannels = [];
+
+    async function loadLiveChannels(useGrid) {
+      if (!useGrid) channelListEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading live channels...</div>';
+
+      try {
+        const res = await fetch('/api/live-channels');
+        const data = await res.json();
+
+        if (!data.success || !data.channels || data.channels.length === 0) {
+          if (!useGrid) channelListEl.innerHTML = '<div class="crichd-error">No channels available.</div>';
+          else document.getElementById('liveMatchesGrid').innerHTML = '<div class="crichd-error">No channels available.</div>';
+          return;
+        }
+
+        allChannels = data.channels.map(ch => ({
+          name: ch.name,
+          url: `/api/hls-proxy?url=${encodeURIComponent(ch.url)}&referer=${encodeURIComponent(ch.referer || 'https://executeandship.com/')}&origin=${encodeURIComponent(ch.referer ? new URL(ch.referer).origin : 'https://executeandship.com')}`,
+          logo: ch.logo || '',
+          group: ch.group && ch.group !== 'CricHD 24/7' ? ch.group : 'Sports',
+        }));
+
+        // FanCode channel added asynchronously (non-blocking)
+        renderLiveChannels(allChannels, useGrid);
+        sectionCache['livechannels'] = { html: document.getElementById('liveMatchesGrid').innerHTML, time: Date.now() };
+
+        fetch('/api/crichd?action=stream&streamUrl=https://dadocric.st/player.php?id=cricgo2')
+          .then(r => r.json())
+          .then(fanData => {
+            if (fanData.success && fanData.stream) {
+              allChannels.unshift({
+                name: 'FanCode',
+                url: fanData.stream.url,
+                logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAA7VBMVEX/UAD/////TAD/Zif/fk//l3j/TQD/RgD/SQD/QQD/4dT/UgD/+PT/9fH/QAD/wqz/s5v/vab/0sT/hFj/Vxb/WiL/Xx//6+L/zr7/5t3/qI7/3tH/7+j/+PP/VwD/xLj/eEj/18n/nXz/ooj/xrL/t6H/jGb/rZf/ckX/bzz/ZTH/0MX/p5D/ybz/mnX/7Oj/jm7/mW3/gFv/cDf/jF//spH/x6//m4H/gk7/eVX/gVr/kWj/h2P/uJf/Zzr/vqH/oXr/jVr/YC7/lWX/1L3/qYf/fkX/bjD/ilb/2ND/vK//sqH/iWz/bEP/oInEfZ+sAAAWkklEQVR4nO1dCXvauNa2DGgB22wOxmAIBhICaRLabM0yTW+naSft3P7/n/NJsrHlYBsJyEy5H+8z8xQrsq1Xy9E5R0eyNir9b6OmtfD/NNBAK0Dtfxl6cc9w17FnuPvYM9x97BnuPvYMdx97hruPPcPdx57h7mPPcPexZ7j72DPcfewZ7j7+IYb/YiWqMmR+cgh15i1HWPpG2IK6cBUimeV1KkxCoYxJqDIcfj4vFaYnzdGwM3m4xDgouI4gY4ziJyGIEFqwgvp1874S/ES4YoeoIBxmwEiz49TgNjuJOPMbMoQ6snwDAPpfCLdd5HSKR0530uk0LsNHQVR3JvXxfUix33TB5/NP9I+4P3FNoxfA7M4R/zt5bHi9BbyXIk3VT3pJeC/3LDP56jkJeGO0NYawdT+qx+w4rou0FXFpcVlbvM3jlw0SvGNwDcDnpwNKcOol7++wG1A7mQhKSMNzsIRj2orWUurR9hii2tLTnfL4/UfNjq7D+lzk7Fr80nIoL6NL68imFWSOqyFMmmUKNXLGKmOROGZZ+pA+wqcXVTHZwRrs06dWY/gAPKzovSoMq8vV2vva1MhRdHkY5LS6Qq3zUlGGZcQbqz5sdAM0ijTbEONH2tsfxmFi92zgAPBBJy+g3K7OG+0QZ5e0llqQZX7fjkGf8N8VxVdh6C8RLBc1DOMmXHRLtLh22XXQ4eh4gTMA/Lg6gPHAuilq0HYQnul2WM3oDnv8TZxs3gJQgGgCwG2iCKa9PYa0WuO2c/2zo8nZQwtqSCjzIWcICxGHPn12mKGEGdUhKzgHa2J6jSoeaNC2dXmiS+8Z0TbEdpdmOCzTpl9kvmJtSNrAe6avj9FdJWIVGOpTJyh316IzASL0f/Z0XRAeZ5yhfhIlTKk0JUHbn+hseP6H8uK3W3Vg0NZ6xF8AeGcCnydSWQ1cmouKXURlyrMJOkHmU2BMgAE16wK49EaIIqycQ1RmC1oojlMiJKJR0FpBL+WSBsf9aMjEn8l7E83aAL13APT5+yhvpwqMArrizTMJZBTNe0qbidcnb/ASZ0AHiH8Gygj2DVDvggtLssSqDEkjKHZHkM8wnBiGwjgUhG6XZq0YQcNrusvKaQa1bvFUT2cji5HkqbBCZ5wLPnxpNbE2nvIplY7KukN7iD6gDeuBMVkq23YZPgrqGuoE4iEYemX+asuP++0MssagqCMmkn64nDSbOIIbLDayJrxfstJQBp9NmpePXu+adcww8zmrWTbz0j4zIXoAmZIr9dKLQHp9sw4wCfs/DrrnfMb/8ThDbMYMayicu6tIv+Sy5UfQA1rHFPMptBzgj4FX4YXAI87gFvNqejkFrhUUEoA/ASjqlDYTwKOTQYCpRNGV2jBk2H4B3bPzYIAEHdLTvwSEGEM4ExQfh4RZfmE85IJmuKgbrsQzJYU2rBuqCnVgUlF5R7smMsGTG/ZHRvwd6w9UnJud+OFglcamyhCKKpdbwMG44aMQHQSseHkehWzgMpz+v0P0g89lAz3xTNq934PFyKJ5nRqXRbBggIkJ3nEKZMwkqEfNDdrgp8LDzyW0cRW9tC/0PvPmo... (line truncated to 2000 chars)',
+                group: 'Sports',
+              });
+              renderLiveChannels(allChannels, useGrid);
+              sectionCache['livechannels'] = { html: document.getElementById('liveMatchesGrid').innerHTML, time: Date.now() };
+            }
+          })
+          .catch(() => {});
+
+      } catch (err) {
+        if (!useGrid) channelListEl.innerHTML = '<div class="crichd-error">Error: ' + err.message + '</div>';
+        else document.getElementById('liveMatchesGrid').innerHTML = '<div class="crichd-error">Error: ' + err.message + '</div>';
+      }
+    }
+
+    // FootyStream - multi-sport
+    let footyStreamEvents = [];
+
+    async function loadFootyStream() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading FootyStream events...</div>';
+
+      try {
+        const res = await fetch('/api/footystream');
+        const data = await res.json();
+
+        if (!data.success || !data.events || data.events.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No events found. Try again later.</div>';
+          return;
+        }
+
+        footyStreamEvents = (data.events || []).filter(e => !/(?:^|[^a-z])psl(?:[^a-z]|$)|pakistan super/i.test((e.league || '') + ' ' + (e.title || '')));
+        renderFootyEvents(footyStreamEvents);
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function renderFootyEvents(events) {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '';
+
+      events.forEach((event, idx) => {
+        const div = document.createElement('div');
+        div.className = 'crichd-match';
+        div.onclick = () => openFootyEvent(event);
+
+        const teamLogos = event.logos || [];
+        const teams = event.teams || [];
+        let teamsHtml = '';
+        if (teams.length >= 2) {
+          const logo1 = teamLogos[0] ? `<img src="${teamLogos[0]}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">` : '';
+          const logo2 = teamLogos[1] ? `<img src="${teamLogos[1]}" style="width:60px;height:60px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">` : '';
+          teamsHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${logo1}<span style="font-size:11px;color:#ccc;font-weight:600;">${teams[0].toUpperCase()}</span></div>
+            <span style="color:#4a9eff;font-weight:bold;font-size:16px;">VS</span>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${logo2}<span style="font-size:11px;color:#ccc;font-weight:600;">${teams[1].toUpperCase()}</span></div>
+          </div>`;
+        } else {
+          teamsHtml = `<div style="font-weight:700;font-size:14px;color:#fff;text-align:center;">${event.title}</div>`;
+        }
+
+        // Format time
+        let timeStr = event.startTime ? formatISOToNPT(event.startTime) : '';
+        if (timeStr) timeStr = ' • ' + timeStr;
+
+        div.innerHTML = `
+          <div class="match-title" style="text-align:center;">${teamsHtml}</div>
+          <div style="font-size:12px;color:#888;margin-bottom:6px;text-align:center;">${event.league}${timeStr}</div>
+          <div class="server-count" style="text-align:center;">${event.isLive ? '<span class="live-tag">LIVE</span>' : 'UPCOMING'}</div>
+        `;
+
+        grid.appendChild(div);
+      });
+    }
+
+    function formatISOToNPT(isoStr) {
+      if (!isoStr) return '';
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return '';
+        const npt = new Date(d.getTime() + 345 * 60000);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = npt.getUTCHours();
+        const m = npt.getUTCMinutes();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const hh = h % 12 || 12;
+        const mm = String(m).padStart(2, '0');
+        const date = npt.getUTCDate() + ' ' + months[npt.getUTCMonth()];
+        return `${hh}:${mm} ${ampm} NPT • ${date}`;
+      } catch (e) { return ''; }
+    }
+
+    async function openFootyEvent(event) {
+      const channels = event.channels || [];
+      if (channels.length === 0) {
+        alert('No streams available yet. Try closer to match time.');
+        return;
+      }
+
+      const modal = document.getElementById('streamModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+
+      modalTitle.textContent = event.title;
+
+      // Resolve embed channels to HLS server-side with referer
+      let resolved = channels;
+      try {
+        resolved = await Promise.all(channels.map(async (s) => {
+          if (s.type === 'embed') {
+            let url = '/api/footystream?action=resolve&channelUrl=' + encodeURIComponent(s.url);
+            if (s.referer) url += '&referer=' + encodeURIComponent(s.referer);
+            if (s.ua) url += '&ua=' + encodeURIComponent(s.ua);
+            const r = await fetch(url);
+            const d = await r.json();
+            if (d.success && d.type === 'hls') {
+              return { ...s, url: d.url, type: 'hls' };
+            }
+            if (d.success && d.type === 'embed' && d.url !== s.url) {
+              return { ...s, url: d.url, type: 'embed' };
+            }
+          }
+          return s;
+        }));
+      } catch (e) {}
+
+      const hasHls = resolved.some(s => s.type === 'hls' || s.url.includes('.m3u8'));
+      if (!hasHls) {
+        modalBody.innerHTML = `<div class="match-detail"><div class="vs">⏳ Not Live Yet</div><div style="text-align:center;color:#888;margin-top:8px;font-size:14px;">Stream will appear when the event goes live</div></div>`;
+        modal.classList.add('show');
+        return;
+      }
+      let html = '';
+      resolved.forEach((s, i) => {
+        const chType = s.type || 'embed';
+        const emoji = chType === 'hls' ? ' 🎬' : ' 📺';
+        const lang = s.language ? ` (${s.language})` : '';
+        html += `<div class="stream-link" onclick="playFootyStream('${esc(s.url)}', '${esc(s.name + lang)}', '${esc(chType)}')">
+          <div class="name">${s.name}</div>
+          <div class="quality">${s.language || 'Stream ' + (i + 1)}${emoji}</div>
+        </div>`;
+      });
+      modalBody.innerHTML = html;
+      modal.classList.add('show');
+    }
+
+    function playFootyStream(url, name, type) {
+      const modal = document.getElementById('streamModal');
+      if (modal) modal.classList.remove('show');
+
+      // Clean up previous player
+      let iframe = document.getElementById('yonoFrame');
+      if (iframe) { iframe.parentNode.removeChild(iframe); iframe = null; }
+      const player = document.getElementById('player');
+      if (hls) { hls.destroy(); hls = null; }
+      player.style.display = 'none';
+
+      // If it's a direct HLS stream, use our player
+      if (type === 'hls' || type === 'direct' || url.includes('.m3u8')) {
+        showFloatPlayer(url, name);
+        nowPlayingEl.innerHTML = name;
+        return;
+      }
+
+      // If embed, try inline iframe first; add pop-out button
+      if (type === 'embed') {
+        let ef = document.getElementById('yonoFrame');
+        if (!ef) {
+          ef = document.createElement('iframe');
+          ef.id = 'yonoFrame';
+          ef.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+          ef.setAttribute('referrerpolicy', 'no-referrer');
+          document.querySelector('.video-wrap').appendChild(ef);
+        }
+        player.style.display = 'none';
+        ef.style.display = 'block';
+        // Proxy bhalocast pages through our server with correct referer
+        if (url.includes('bhalocast.pro')) {
+          ef.src = '/api/footystream?action=proxy&channelUrl=' + encodeURIComponent(url) + '&referer=' + encodeURIComponent('https://playeraio.top/');
+        } else {
+          ef.src = url;
+        }
+        nowPlayingEl.innerHTML = name + ' <button onclick="window.open(\'' + esc(url) + "', '_blank');" + '" style="background:#4a9eff;border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;margin-left:8px;font-size:12px;">↗ External</button>';
+        return;
+      }
+
+    }
+
+    async function openStreamRKOMatch(event) {
+      const streamUrl = `/api/streamfree-direct?category=${encodeURIComponent(event.category)}&key=${encodeURIComponent(event.streamKey)}`;
+      const title = event.name;
+
+      let iframe = document.getElementById('yonoFrame');
+      if (iframe) { iframe.parentNode.removeChild(iframe); iframe = null; }
+
+      const videoPlayer = document.getElementById('player');
+      if (hls) { hls.destroy(); hls = null; }
+      videoPlayer.pause();
+      videoPlayer.removeAttribute('src');
+      videoPlayer.style.display = 'none';
+
+      nowPlayingEl.innerHTML = `<span style="color:#4a9eff;">Stream RKO:</span> ${title}`;
+
+      // Auto-launch native float player (switches stream if already playing)
+      popOutStreamRKO(streamUrl, title);
+
+      // Fallback: in-page Hls.js for browsers without native support
+      if (!window.Android && window.location.protocol !== 'file:') {
+        videoPlayer.style.display = 'block';
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+          hls = new Hls({
+            fragLoadingMaxRetry: 6,
+            fragLoadingRetryDelay: 1000,
+            manifestLoadingMaxRetry: 6,
+            manifestLoadingRetryDelay: 1000,
+          });
+          hls.loadSource(streamUrl);
+          hls.attachMedia(videoPlayer);
+          hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            videoPlayer.play().catch(function() {});
+          });
+          hls.on(Hls.Events.ERROR, function(event, data) {
+            if (data.fatal) {
+              hls.destroy();
+              hls = null;
+              nowPlayingEl.innerHTML = `Stream RKO failed: ${title}. <button onclick="openStreamRKOMatch(streamRKOEvents.find(e=>e.name==='${esc(title)}'))" style="background:#e67e22;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;margin-left:8px;">Retry</button>`;
+            }
+          });
+        } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+          videoPlayer.src = streamUrl;
+          videoPlayer.play().catch(function() {});
+        } else {
+          nowPlayingEl.innerHTML = 'Stream RKO: HLS not supported in this browser';
+        }
+      }
+    }
+
+    function popOutStreamRKO(proxyUrl, title) {
+      nowPlayingEl.innerHTML = `<span class="loading-spinner" style="display:inline-block;width:16px;height:16px;border-width:2px;vertical-align:middle;margin-right:8px;"></span> Connecting to ${title}...`;
+      if (proxyUrl && proxyUrl.indexOf('/') === 0) {
+        proxyUrl = window.location.origin + proxyUrl;
+      }
+      if (window.Android) {
+        try {
+          Android.startStreamRkoFloatingPlayer(proxyUrl, title || 'Stream RKO');
+          return;
+        } catch(e) {}
+        try {
+          window.location.href = 'rko://streamrkofloat?url=' + encodeURIComponent(proxyUrl) + '&title=' + encodeURIComponent(title || 'Stream RKO');
+          return;
+        } catch(e) {}
+      }
+      if (window.location.protocol === 'file:') {
+        try {
+          window.location.href = 'rko://streamrkofloat?url=' + encodeURIComponent(proxyUrl) + '&title=' + encodeURIComponent(title || 'Stream RKO');
+          return;
+        } catch(e) {}
+      }
+      showFloatPlayer(proxyUrl, title, true);
+    }
+
+    let wweEvents = [];
+
+    async function loadWWE() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading WWE events...</div>';
+
+      try {
+        const res = await fetch('/api/watchwrestling');
+        const data = await res.json();
+
+        if (!data.success || !data.events || data.events.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No WWE events found. Try again later.</div>';
+          return;
+        }
+
+        wweEvents = data.events;
+        renderWWEEvents(data.events);
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function renderWWEEvents(events) {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '';
+
+      events.forEach(event => {
+        const div = document.createElement('div');
+        div.className = 'wwe-event';
+        div.onclick = () => openWWEEvent(event);
+
+        const posterHtml = event.poster
+          ? `<img src="${event.poster}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:40px;\\'>🤼</span>'">`
+          : '<span style="font-size:40px">🤼</span>';
+
+        div.innerHTML = `
+          <div class="event-poster">${posterHtml}</div>
+          <div class="event-title">${event.title}</div>
+          <div class="server-count"><span class="live-tag">WWE</span> Click to watch</div>
+        `;
+
+        grid.appendChild(div);
+      });
+    }
+
+    async function openWWEEvent(event) {
+      const modal = document.getElementById('streamModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+
+      modalTitle.textContent = event.title;
+      modalBody.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Extracting live stream...</div>';
+      modal.classList.add('show');
+
+      try {
+        const res = await fetch(`/api/watchwrestling?action=servers&eventUrl=${encodeURIComponent(event.url)}`);
+        const data = await res.json();
+
+        if (!data.success || !data.servers || data.servers.length === 0) {
+          modalBody.innerHTML = `<div class="crichd-error">No live stream available for ${event.title}.</div>`;
+          return;
+        }
+
+        // Auto-try each server until we find an m3u8 stream
+        let resolvedServers = [];
+        const embedOnlySites = ['sawlivenow.com', 'punjabeducareapp.com', 'pwrestling.com'];
+        for (const server of data.servers) {
+          // Skip stream resolution for embed-only sites to preserve one-time redirect tokens
+          if (embedOnlySites.some(s => server.url.includes(s))) {
+            resolvedServers.push({ server, stream: { url: server.url, type: 'iframe' } });
+            continue;
+          }
+          modalBody.innerHTML = `<div class="loading"><div class="loading-spinner"></div>Resolving ${server.name}...</div>`;
+          try {
+            const sRes = await fetch(`/api/watchwrestling?action=stream&serverUrl=${encodeURIComponent(server.url)}&referer=${encodeURIComponent(event.url)}`);
+            const sData = await sRes.json();
+            if (sData.success && sData.stream && sData.stream.type === 'm3u8') {
+              const valid = await validateM3U8(sData.stream.url);
+              if (!valid) { resolvedServers.push({ server, stream: sData.stream }); continue; }
+              let refUrl = server.url, originUrl = '';
+              try { originUrl = new URL(refUrl).origin; } catch(e) {}
+              const proxyUrl = `/api/hls-proxy?url=${encodeURIComponent(sData.stream.url)}&referer=${encodeURIComponent(refUrl)}&origin=${encodeURIComponent(originUrl)}`;
+              if (typeof Android !== 'undefined' && typeof Android.startWWELiveFloatingPlayer !== 'undefined') {
+                try { Android.startWWELiveFloatingPlayer(proxyUrl, event.title); closeModal(); return; } catch(e) {}
+              }
+              playCricHDStream(event.title, proxyUrl);
+              closeModal();
+              return;
+            }
+            if (sData.success && sData.stream) {
+              resolvedServers.push({ server, stream: sData.stream });
+            }
+          } catch(e) {
+            console.error('Server resolve failed:', server.name, e);
+          }
+        }
+
+        // Only show direct m3u8 streams in live section, filter out embeds
+        resolvedServers = resolvedServers.filter(s => s.stream.type === 'm3u8');
+
+        // No m3u8 auto-played — prepend known direct m3u8 URLs as fallback servers
+          const knownDirectStreams = [
+            { name: 'Netflix Server', url: 'https://todo.loreofeldenring.site/dailymotion/live/playlist/4.m3u8' },
+            { name: 'Live Streaming -livestream3', url: 'https://todo.loreofeldenring.site/dailymotion/live/playlist/1.m3u8' },
+          ];
+          for (const ks of knownDirectStreams) {
+            if (!resolvedServers.some(s => s.server.url === ks.url)) {
+              resolvedServers.unshift({ server: ks, stream: { url: ks.url, type: 'm3u8' } });
+            }
+          }
+          if (resolvedServers.length === 0) {
+            modalBody.innerHTML = `<div class="crichd-error">No live stream available for ${event.title}.</div>`;
+          } else {
+            let linksHtml = '<div style="margin-bottom:12px;font-size:13px;color:#888;">Available streams:</div>';
+            resolvedServers.forEach(({ server, stream }) => {
+            const playUrl = stream.url || server.url;
+            linksHtml += `
+              <div class="stream-link" onclick="playHighlightStream('${esc(server.url)}', '${esc(event.title)}', '${esc(event.url)}');closeModal();">
+                <div class="name">${server.name}</div>
+                <div class="quality">${stream.type === 'm3u8' ? 'HD Stream' : 'Web Player'}</div>
+              </div>
+            `;
+          });
+        modalBody.innerHTML = linksHtml;
+
+        // Pre-fetch first server's stream URL to warm cache
+        if (data.servers.length > 0) {
+          const first = data.servers[0];
+          fetch(`/api/crichd?action=stream&streamUrl=${encodeURIComponent(first.url)}`).catch(() => {});
+        }
+        }
+      } catch (err) {
+        modalBody.innerHTML = `<div class="crichd-error">Failed to load streams: ${err.message}</div>`;
+      }
+    }
+
+    async function validateM3U8(url) {
+      try {
+        const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(10000) });
+        if (!res.ok) return false;
+        const text = await res.text();
+        return text.trim().startsWith('#EXTM3U');
+      } catch(e) {
+        console.error('m3u8 validate failed:', url, e);
+        return false;
+      }
+    }
+
+    let wweHighlightEvents = [];
+
+    async function loadWWEHighlights() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading WWE highlights...</div>';
+      try {
+        const res = await fetch('/api/watchwrestling');
+        const data = await res.json();
+        if (!data.success || !data.events || data.events.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No highlights found.</div>';
+          return;
+        }
+        wweHighlightEvents = data.events;
+        renderWWEHighlights(data.events);
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function renderWWEHighlights(events) {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '';
+      events.forEach(event => {
+        const div = document.createElement('div');
+        div.className = 'wwe-event';
+        div.onclick = () => openWWEHighlightEvent(event);
+        const posterHtml = event.poster
+          ? `<img src="${event.poster}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:40px;\\'>🤼</span>'">`
+          : '<span style="font-size:40px">🤼</span>';
+        div.innerHTML = `
+          <div class="event-poster">${posterHtml}</div>
+          <div class="event-title">${event.title}</div>
+          <div class="server-count"><span class="live-tag" style="background:#f90">HIGHLIGHT</span> Click to watch</div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    async function openWWEHighlightEvent(event) {
+      const modal = document.getElementById('streamModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      modalTitle.textContent = event.title;
+      modalBody.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading streams...</div>';
+      modal.classList.add('show');
+      try {
+        const res = await fetch(`/api/watchwrestling?action=servers&eventUrl=${encodeURIComponent(event.url)}`);
+        const data = await res.json();
+        if (!data.success || !data.servers || data.servers.length === 0) {
+          modalBody.innerHTML = `<div class="crichd-error">No streams for ${event.title}.</div>`;
+          return;
+        }
+        let linksHtml = '<div style="margin-bottom:12px;font-size:13px;color:#888;">Available streams (plays in web player):</div>';
+        data.servers.forEach(server => {
+          linksHtml += `
+            <div class="stream-link" onclick="playHighlightStream('${esc(server.url)}', '${esc(event.title)}', '${esc(event.url)}');closeModal();">
+              <div class="name">${server.name}</div>
+              <div class="quality">Play in web player</div>
+            </div>
+          `;
+        });
+        modalBody.innerHTML = linksHtml;
+      } catch (err) {
+        modalBody.innerHTML = `<div class="crichd-error">Failed to load streams: ${err.message}</div>`;
+      }
+    }
+
+    async function playHighlightStream(serverUrl, title, referer) {
+      const blockedSites = ['sawlivenow.com', 'punjabeducareapp.com', 'pwrestling.com'];
+      try {
+        const res = await fetch(`/api/watchwrestling?action=stream&serverUrl=${encodeURIComponent(serverUrl)}&referer=${encodeURIComponent(referer)}`);
+        const data = await res.json();
+        if (data.success && data.stream) {
+          if (data.stream.type === 'm3u8') {
+            let refUrl = serverUrl;
+            let originUrl = '';
+            try { originUrl = new URL(refUrl).origin; } catch(e) { originUrl = refUrl; }
+            const proxyUrl = `/api/hls-proxy?url=${encodeURIComponent(data.stream.url)}&referer=${encodeURIComponent(refUrl)}&origin=${encodeURIComponent(originUrl)}`;
+            playCricHDStream(title, proxyUrl);
+            return;
+          }
+          // For embed-only sites, try to capture the m3u8 URL from the proxied embed
+          if (blockedSites.some(s => data.stream.url.includes(s) || serverUrl.includes(s))) {
+            tryCaptureFromEmbed(serverUrl, title, referer);
+            return;
+          }
+          playEmbedInMainPlayer(data.stream.url, title, referer);
+          return;
+        }
+      } catch(e) {
+        console.error('playHighlightStream failed:', e);
+      }
+      // Fallback: if blocked site, try capture; otherwise plain embed
+      if (blockedSites.some(s => serverUrl.includes(s))) {
+        tryCaptureFromEmbed(serverUrl, title, referer);
+      } else {
+        playEmbedInMainPlayer(serverUrl, title, referer);
+      }
+    }
+
+    async function tryCaptureFromEmbed(serverUrl, title, referer) {
+      const proxyUrl = '/api/watchwrestling?action=proxy-embed&url=' + encodeURIComponent(serverUrl) + '&referer=' + encodeURIComponent(referer || serverUrl);
+      // Create hidden iframe to load the embed and capture m3u8 URL
+      let captIframe = document.createElement('iframe');
+      captIframe.style.cssText = 'width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;';
+      captIframe.id = 'captureIframe';
+      document.body.appendChild(captIframe);
+      nowPlayingEl.innerHTML = `<div class="loading-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;"></div> Loading: ${title}`;
+      captIframe.src = proxyUrl;
+      // Poll for captured m3u8 URL
+      let polled = false;
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        try {
+          const captured = captIframe.contentWindow && captIframe.contentWindow._capturedM3u8;
+          if (captured && captured.includes('.m3u8')) {
+            polled = true;
+            captIframe.parentNode.removeChild(captIframe);
+            playCricHDStream(title, captured);
+            return;
+          }
+        } catch(e) {}
+      }
+      // Timeout — remove hidden iframe, show as visible embed
+      if (!polled) {
+        captIframe.parentNode.removeChild(captIframe);
+        playEmbedInMainPlayer(serverUrl, title, referer);
+      }
+    }
+
+    function playEmbedInMainPlayer(url, title, referer) {
+      const videoPlayer = document.getElementById('player');
+      if (hls) { hls.destroy(); hls = null; }
+      videoPlayer.pause();
+      videoPlayer.removeAttribute('src');
+      videoPlayer.style.display = 'none';
+
+      let iframe = document.getElementById('yonoFrame');
+      if (iframe) { iframe.parentNode.removeChild(iframe); iframe = null; }
+      iframe = document.createElement('iframe');
+      iframe.id = 'yonoFrame';
+      iframe.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+      iframe.setAttribute('allowfullscreen', '');
+      document.querySelector('.video-wrap').appendChild(iframe);
+      // Use proxy-embed for sites that block iframe embedding
+      const blockedSites = ['sawlivenow.com', 'punjabeducareapp.com', 'pwrestling.com'];
+      if (blockedSites.some(s => url.includes(s))) {
+        iframe.src = '/api/watchwrestling?action=proxy-embed&url=' + encodeURIComponent(url) + '&referer=' + encodeURIComponent(referer || url);
+      } else {
+        iframe.src = url;
+      }
+      nowPlayingEl.innerHTML = `Playing: ${title} (Highlight)`;
+    }
+
+    async function playWWEUrl(url, title, referer) {
+      try {
+        const res = await fetch(`/api/watchwrestling?action=stream&serverUrl=${encodeURIComponent(url)}&referer=${encodeURIComponent(referer)}`);
+        const data = await res.json();
+        if (data.success && data.stream && data.stream.type === 'm3u8') {
+          const valid = await validateM3U8(data.stream.url);
+          if (!valid) {
+            const modalBody = document.getElementById('modalBody');
+            if (modalBody) modalBody.innerHTML = `<div class="crichd-error">Stream broken for ${title}.</div>`;
+            return;
+          }
+          if (typeof Android !== 'undefined' && typeof Android.startWWELiveFloatingPlayer !== 'undefined') {
+            try { Android.startWWELiveFloatingPlayer(data.stream.url, title || 'WWE Live'); closeModal(); return; } catch(e) {}
+          }
+          playCricHDStream(title, data.stream.url);
+          return;
+        }
+      } catch(e) {
+        console.error('playWWEUrl fetch failed:', e);
+      }
+      const modalBody = document.getElementById('modalBody');
+      if (modalBody) modalBody.innerHTML = `<div class="crichd-error">No live direct stream for ${title}.</div>`;
+    }
+
+    let ipl2Events = [];
+
+    async function loadIPL2() {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '<div class="crichd-loading"><div class="loading-spinner"></div>Loading IPL LIVE 2...</div>';
+
+      try {
+        const webcricRes = await fetch('/api/webcric?action=events');
+        const webcricData = await webcricRes.json();
+
+        if (!webcricData.success || !webcricData.events || webcricData.events.length === 0) {
+          grid.innerHTML = '<div class="crichd-error">No live matches found. Try again later.</div>';
+          return;
+        }
+
+        let crichdMatches = [];
+        try {
+          const crichdRes = await fetch('/api/crichd');
+          const crichdData = await crichdRes.json();
+          crichdMatches = crichdData.matches || [];
+        } catch (e) {
+          // CricHD schedule is optional, continue without it
+        }
+
+        ipl2Events = webcricData.events;
+        renderIPL2Events(webcricData.events, crichdMatches);
+      } catch (err) {
+        grid.innerHTML = `<div class="crichd-error">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function renderIPL2Events(events, crichdMatches) {
+      const grid = document.getElementById('liveMatchesGrid');
+      grid.innerHTML = '';
+
+      // Build time lookup from CricHD matches
+      const timeLookup = {};
+      (crichdMatches || []).forEach(m => {
+        const key = m.title.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+        timeLookup[key] = m;
+      });
+
+      events.forEach(event => {
+        const div = document.createElement('div');
+        div.className = 'ipl2-event';
+        div.onclick = () => playIPL2Event(event);
+
+        const parsed = parseMatchTitle(event.title);
+        let teamLogosHtml = '';
+        if (parsed.isVs) {
+          const logo1 = getTeamLogoHtml(parsed.team1);
+          const logo2 = getTeamLogoHtml(parsed.team2);
+          teamLogosHtml = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;justify-content:center;">${logo1}<span style="color:#4a9eff;font-size:13px;font-weight:700;">VS</span>${logo2}</div>`;
+        }
+
+        // Try to find matching CricHD match for time
+        const eventParsed = parseMatchTitle(event.title);
+        let timeHtml = '';
+        for (const [, m] of Object.entries(timeLookup)) {
+          const mParsed = parseMatchTitle(m.title);
+          const t1 = (eventParsed.team1 || '').toLowerCase();
+          const t2 = (eventParsed.team2 || '').toLowerCase();
+          const mt1 = (mParsed.team1 || '').toLowerCase();
+          const mt2 = (mParsed.team2 || '').toLowerCase();
+          if ((t1 && mt1 && (t1.includes(mt1) || mt1.includes(t1))) && (t2 && mt2 && (t2.includes(mt2) || mt2.includes(t2)))) {
+            const timeStr = formatMatchTime(m.time, m.day, m.isLive || event.isLive);
+            timeHtml = `<div style="font-size:11px;color:#999;margin-top:4px;">${timeStr}</div>`;
+            break;
+          }
+        }
+        if (!timeHtml && !event.isLive) {
+          timeHtml = `<div style="font-size:11px;color:#999;margin-top:4px;">UPCOMING</div>`;
+        }
+
+        const sourceTag = event.source ? ` • ${event.source}` : '';
+        div.innerHTML = `
+          ${teamLogosHtml}
+          <div class="event-title">${event.title}</div>
+          ${timeHtml}
+          <div class="server-count">${event.isLive ? '<span class="live-tag">LIVE</span>' : 'UPCOMING'}${sourceTag}</div>
+        `;
+
+        grid.appendChild(div);
+      });
+    }
+
+    async function playIPL2Event(event) {
+      console.log('playIPL2Event called:', event.title, event.url);
+      nowPlayingEl.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;display:inline-block;vertical-align:middle;margin-right:8px;"></div> Loading: ' + event.title;
+
+      try {
+        const url = `/api/webcric?action=servers&eventUrl=${encodeURIComponent(event.url)}`;
+        console.log('Fetching:', url);
+        const res = await fetch(url);
+        const data = await res.json();
+        console.log('Response:', data);
+
+        if (data.success && data.servers && data.servers.length > 0) {
+          if (data.servers.length === 1) {
+            playCricHDStream(event.title, data.servers[0].url);
+          } else {
+            console.log('Showing modal with', data.servers.length, 'servers');
+            showServerSelectModal(event.title, data.servers);
+          }
+        } else {
+          nowPlayingEl.innerHTML = 'No stream available for: ' + event.title + '. <button onclick="retryStream()" style="background:#e67e22;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;margin-left:8px;">🔄 Retry</button>';
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        nowPlayingEl.innerHTML = 'Failed to load: ' + event.title + '. <button onclick="retryStream()" style="background:#e67e22;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;margin-left:8px;">🔄 Retry</button>';
+      }
+    }
+
+    function showServerSelectModal(title, servers) {
+      console.log('showServerSelectModal:', title, servers.length, 'servers');
+      const modalBody = document.getElementById('modalBody');
+      const modal = document.getElementById('streamModal');
+      
+      let html = `<div style="padding:20px;text-align:center;"><h3 style="margin-bottom:15px;color:#fff;">Select Stream: ${title}</h3>`;
+      html += '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">';
+
+      servers.forEach((server) => {
+        const logoHtml = server.logo ? `<img src="${server.logo}" style="height:24px;vertical-align:middle;margin-right:8px;border-radius:4px;" onerror="this.style.display='none'">` : '';
+        html += `<button onclick="selectServer('${esc(server.url)}', '${esc(title)}')" style="background:#4a9eff;color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;">${logoHtml}${server.name}</button>`;
+      });
+
+      html += '</div><button onclick="document.getElementById(\'streamModal\').classList.remove(\'show\')" style="margin-top:15px;background:#555;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Cancel</button></div>';
+
+      modalBody.innerHTML = html;
+      modal.classList.add('show');
+      console.log('Modal show class added');
+    }
+
+    function selectServer(url, title) {
+      document.getElementById('streamModal').classList.remove('show');
+      playCricHDStream(title, url);
+    }
+
+    let currentStreamTitle = '';
+    let currentMatch = null;
+
+    function retryStream() {
+      if (currentMatch) {
+        openCricHDMatch(currentMatch);
+      } else if (currentStreamUrl) {
+        playCricHDStream(currentStreamTitle, currentStreamUrl);
+      }
+    }
+
+    function playCricHDStream(title, streamUrl) {
+      currentStreamUrl = streamUrl;
+      currentStreamTitle = title;
+      let iframe = document.getElementById('yonoFrame');
+      if (iframe) { iframe.parentNode.removeChild(iframe); iframe = null; }
+
+      const videoPlayer = document.getElementById('player');
+      if (hls) { hls.destroy(); hls = null; }
+      videoPlayer.pause();
+      videoPlayer.removeAttribute('src');
+      videoPlayer.style.display = 'block';
+
+      if (streamUrl.includes('.m3u8') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+        hls = new Hls({
+          fragLoadingMaxRetry: 6,
+          fragLoadingRetryDelay: 1000,
+          manifestLoadingMaxRetry: 6,
+          manifestLoadingRetryDelay: 1000,
+          xhrSetup: function(xhr) {
+            xhr.timeout = 10000;
+          }
+        });
+        hls.loadSource(streamUrl);
+        hls.attachMedia(videoPlayer);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          videoPlayer.play().catch(function() {});
+        });
+        hls.on(Hls.Events.ERROR, function(event, data) {
+          if (data.fatal) {
+            hls.destroy();
+            hls = null;
+            console.error('HLS Error:', data.type, data.details, data.url);
+            nowPlayingEl.innerHTML = `Stream failed: ${title}. <button onclick="retryStream()" style="background:#e67e22;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;margin-left:8px;">🔄 Retry</button>`;
+          }
+        });
+      } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+        videoPlayer.src = streamUrl;
+        videoPlayer.addEventListener('loadedmetadata', function onMeta() {
+          videoPlayer.removeEventListener('loadedmetadata', onMeta);
+          videoPlayer.play().catch(function() {});
+        });
+      }
+
+      nowPlayingEl.innerHTML = `Playing: ${title} <button onclick="popOutCricHD('${esc(streamUrl)}', '${esc(title)}')" style="background:#4a9eff;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px;">Pop Out 📺</button>`;
+    }
+
+    function popOutCricHD(streamUrl, title) {
+      showFloatPlayer(streamUrl, title);
+    }
+
+    async function playCricHDMatch(match, divEl) {
+      document.querySelectorAll('.channel').forEach(c => c.classList.remove('playing'));
+      if (divEl) divEl.classList.add('playing');
+
+      nowPlayingEl.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;display:inline-block;vertical-align:middle;margin-right:8px;"></div> Loading: ' + match.title;
+
+      try {
+        const res = await fetch(`/api/crichd?action=servers&matchUrl=${encodeURIComponent(match.pageUrl || match.url)}`);
+        const data = await res.json();
+
+        if (!data.success || !data.servers || data.servers.length === 0) {
+          nowPlayingEl.innerHTML = 'No streams available for: ' + match.title;
+          return;
+        }
+
+        let iframe = document.getElementById('yonoFrame');
+        if (iframe) { iframe.parentNode.removeChild(iframe); iframe = null; }
+
+        const streamRes = await fetch(`/api/crichd?action=stream&streamUrl=${encodeURIComponent(data.servers[0].url)}`);
+        const streamData = await streamRes.json();
+
+        if (streamData.success && streamData.stream) {
+          playCricHDStream(match.title + ' (' + data.servers[0].name + ')', streamData.stream.url);
+          if (data.servers.length > 1) {
+            const serverBtns = data.servers.map((s, i) =>
+              `<button onclick="switchCricHDServer('${esc(s.url)}', '${esc(match.title)}')" style="background:${i === 0 ? '#4a9eff' : '#666'};border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:5px;">${s.name}</button>`
+            ).join('');
+            nowPlayingEl.innerHTML = `Playing: ${match.title} (${data.servers[0].name}) ${serverBtns} <button onclick="popOutCricHD('${esc(streamData.stream.url)}', '${esc(match.title)}')" style="background:#4a9eff;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px;">Pop Out 📺</button>`;
+          }
+        } else {
+          nowPlayingEl.innerHTML = 'Stream unavailable: ' + match.title;
+        }
+      } catch (err) {
+        nowPlayingEl.innerHTML = 'Failed to load: ' + match.title;
+      }
+    }
+
+    async function switchCricHDServer(url, title) {
+      const streamRes = await fetch(`/api/crichd?action=stream&streamUrl=${encodeURIComponent(url)}`);
+      const streamData = await streamRes.json();
+
+      if (streamData.success && streamData.stream) {
+        playCricHDStream(title, streamData.stream.url);
+        nowPlayingEl.innerHTML = `Playing: ${title} <button onclick="popOutCricHD('${esc(streamData.stream.url)}', '${esc(title)}')" style="background:#4a9eff;border:none;color:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px;">Pop Out 📺</button>`;
+      } else {
+        nowPlayingEl.innerHTML = 'Failed to load: ' + title;
+      }
+    }
+
+    async function playCricHDUrl(url, title) {
+      nowPlayingEl.innerHTML = '<div class="loading-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Loading: ' + title;
+      const streamRes = await fetch(`/api/crichd?action=stream&streamUrl=${encodeURIComponent(url)}`);
+      const streamData = await streamRes.json();
+
+      if (streamData.success && streamData.stream) {
+        if (window.Android) {
+          // On Android, send directly to floating player
+          try {
+            Android.startStreamRkoFloatingPlayer(streamData.stream.url, title);
+          } catch(e) {
+            window.location.href = 'rko://streamrkofloat?url=' + encodeURIComponent(streamData.stream.url) + '&title=' + encodeURIComponent(title);
+          }
+        } else {
+          playCricHDStream(title, streamData.stream.url);
+        }
+      } else {
+        nowPlayingEl.innerHTML = 'Failed to load: ' + title;
+      }
+    }
+
+    let prefetchCache = {};
+    function prefetchStream(url) {
+      if (prefetchCache[url]) return;
+      prefetchCache[url] = true;
+      fetch(`/api/crichd?action=stream&streamUrl=${encodeURIComponent(url)}`).catch(() => {});
+    }
+
+    function renderLiveMatches() {
+      channelListEl.innerHTML = '<div style="padding:20px;text-align:center;">No live matches available</div>';
+    }
+
+    const flags = { 'NP': '🇳🇵', 'IN': '🇮🇳', 'BD': '🇧🇩', 'PK': '🇵🇰', 'LK': '🇱🇰', 'BT': '🇧🇹', 'OM': '🇴🇲', 'US': '🇺🇸', 'GB': '🇬🇧', 'AU': '🇦🇺', 'CA': '🇨🇦', 'IT': '🇮🇹', 'DE': '🇩🇪', 'FR': '🇫🇷', 'ES': '🇪🇸', 'BR': '🇧🇷', 'MX': '🇲🇽', 'JP': '🇯🇵', 'KR': '🇰🇷', 'CN': '🇨🇳', 'RU': '🇷🇺' };
+    const countries = { 'NP': 'Nepal', 'IN': 'India', 'BD': 'Bangladesh', 'PK': 'Pakistan', 'LK': 'Sri Lanka', 'BT': 'Bhutan', 'OM': 'Oman', 'US': 'USA', 'GB': 'UK', 'AU': 'Australia', 'CA': 'Canada', 'IT': 'Italy', 'DE': 'Germany', 'FR': 'France', 'ES': 'Spain', 'BR': 'Brazil', 'MX': 'Mexico', 'JP': 'Japan', 'KR': 'South Korea', 'CN': 'China', 'RU': 'Russia' };
+
+    // Load preset source
+    function loadPreset() {
+      const select = document.getElementById('presetSelect');
+      const url = select.value;
+      
+      // CricHD Live Sports
+      if (url === '__CRICHD__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadCricHD();
+        return;
+      }
+      
+      // WWE LIVE
+      if (url === '__WWE_LIVE__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadWWE();
+        return;
+      }
+
+      // WWE Highlights
+      if (url === '__WWE_HIGHLIGHTS__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadWWEHighlights();
+        return;
+      }
+      
+      // IPL LIVE 2
+      if (url === '__IPL_LIVE_2__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadIPL2();
+        return;
+      }
+      
+      // Premium Channels
+      if (url === '__PREMIUM_CHANNELS__') {
+        document.body.classList.add('playlist-mode');
+        document.body.classList.remove('crichd-mode');
+        allChannels = [
+          { name: 'HD IPL', urls: ['https://newcdn.tamils.click/live/mylive.m3u8', 'https://primevip.day/live/trialShamin/gvydfbjb3879debe/423902.m3u8', 'https://a51.azplay31.me/hls/streama258584/index.m3u8?cst=c0e27492c6a65b2e5c11bc22abc6ffd2', 'https://plu002.myturn1.top:8088/live/starsports01/playlist.m3u8?id=123144&pk=9d9c359f9527d34ae528ccb70f1d438900c5822db4310c48ff85c528bf2dae0291836d4b2e2d7985b52707df5ebe13bb4d90f65b0f27abcf5b58d254f7435e97'], group: 'Sports', logo: '🏏' },
+          { name: 'Willow Hindi', urls: ['https://muc001.myturn1.top:8088/live/webcrichindi/playlist.m3u8?vidictid=205746627543&id=119771&pk=828a8452c7f721e6a26009de864265768a945f0509b87d0512352cc8b6b32ae8a5d1623934e6b5b63cd4b535edbdad4dfaf79da4cfbdfef15693a9834ffdef8b', 'https://plu002.myturn1.top:8088/live/webcrichindi/playlist.m3u8?vidictid=205718619788&id=119771&pk=ab6dd2606245447c89e8f769b4ba9625bc4e041853821d8427bb2433b82258edde73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://trl01.pctrls.nl/procricket/amlst:stream_2_b550000/chunklist.m3u8?vidictid=595316108654429&id=2&pk=A176AC038E6D9260C16B311E201548074E6543671DA51452B1A37FB18519AAA2&userId=de067d4b-60bf-4ec7-bb98-97b8cc6f69f5&sk=7rXtRl6Di2CAMu9Cv4IB2g%3D%3D', 'https://plu002.myturn1.top:8088/live/webcrichindi/media_14273.ts?vidictid=205676518129&id=119771&pk=dae65c24ed1c2dafbaaf90d9de16452b837f90efea61b6bac0a3f9a9e2aa9f97dc5bc5b75b3516eddea0faf52f1a49a8b4a07c722f2fb5bef24e947b0a88935a'], group: 'Sports', logo: 'https://i.imgur.com/eg7RgjP.png' },
+          { name: 'Star Sports Hindi', url: 'https://trl01.pctrls.nl/procricket_b/amlst:stream_2b_b2050000/chunklist.m3u8?vidictid=874350676714619&id=12&pk=A176AC038E6D9260C16B311E201548074E6543671DA51452B1A37FB18519AAA2&userId=de067d4b-60bf-4ec7-bb98-97b8cc6f69f5&sk=gTCfrkDelIHWD4tsa82r3Q%3D%3D', fallback: 'https://plu001.myturn1.top:8088/live/starsports01/playlist.m3u8?vidictid=205678693693&id=123144&pk=dae65c24ed1c2d2dafbaaf90d9de16452b837f90efea61b6bac0a3f9a9e2aa9f97dc5bc5b75b3516eddea0faf52f1a49a8b4a07c722f2fb5bef24e947b0a88935a', group: 'Sports', logo: 'https://i.imgur.com/Js5Eg2V.png' },
+          { name: 'Star Sports 1', urls: ['https://plu001.myturn1.top:8088/live/webcricp01/playlist.m3u8?vidictid=205711368063&id=113431&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://plu001.myturn1.top:8088/live/starsports01/playlist.m3u8?vidictid=205678693693&id=123144&pk=dae65c24ed1c2dafbaaf90d9de16452b837f90efea61b6bac0a3f9a9e2aa9f97dc5bc5b75b3516eddea0faf52f1a49a8b4a07c722f2fb5bef24e947b0a88935a'], group: 'Sports', logo: 'https://i.imgur.com/Js5Eg2V.png' },
+          { name: 'Willow TV', urls: ['https://plu002.myturn1.top:8088/live/webcricn02/playlist.m3u8?vidictid=205748944458&id=115656&pk=828a8452c7f721e6a26009de864265768a945f0509b87d0512352cc8b6b32ae8a5d1623934e6b5b63cd4b535edbdad4dfaf79da4cfbdfef15693a9834ffdef8b', 'https://plu002.myturn1.top:8088/live/webcricn02/playlist.m3u8?vidictid=205714911028&id=115656&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://muc002.myturn1.top:8088/live/webcricn02/playlist.m3u8?vidictid=205727955977&id=115656&pk=9d9c359f9527d34ae528ccb70f1d438900c5822db4310c48ff85c528bf2dae0291836d4b2e2d7985b52707df5ebe13bb4d90f65b0f27abcf5b58d254f7435e97','https://plu002.myturn1.top:8088/live/webcricn02/playlist.m3u8?vidictid=205702692596&id=115656&pk=d7d71624bbb8fe06530cb7b7f4763611da5e4267b60d553d7d7a10af44bf4e2cc9e3decb932bf3815fa230e92e2631e5eff378f257476de67451dc5397b9b942', 'https://plu002.myturn1.top:8088/live/webcricwillow/playlist.m3u8?vidictid=205715679728&id=120375&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://mut001.myturn1.top:8088/live/webcricwillow/media_1533.ts?vidictid=205719927676&id=120375&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://muc001.myturn1.top:8088/live/webcrict10/playlist.m3u8?vidictid=205719481800&id=113947&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6'], group: 'Sports', logo: 'https://i.imgur.com/MzxqTMf.png' },
+          { name: 'Sky Sports', urls: ['https://plu001.myturn1.top:8088/live/webcricp01/playlist.m3u8?vidictid=205711368063&id=113431&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://muc002.myturn1.top:8088/live/webcricsky/playlist.m3u8?vidictid=205722932535&id=121345&pk=9d9c359f9527d34ae528ccb70f1d438900c5822db4310c48ff85c528bf2dae0291836d4b2e2d7985b52707df5ebe13bb4d90f65b0f27abcf5b58d254f7435e97', 'https://mut001.myturn1.top:8088/live/webcricn04/playlist.m3u8?vidictid=205713317820&id=114607&pk=a312642c725fc0360dbee23c24324607809a90928621a75e1d377e74ab6c12a1de73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://plu002.myturn1.top:8088/live/webcricsky/playlist.m3u8?vidictid=205713757653&id=121345&pk=ab6dd2606245447c89e8f769b4ba9625bc4e041853821d8427bb2433b82258edde73e224004d64d13343cf9a37cd2f17440d34a6a3431b3666b0244a785686e6', 'https://muc002.myturn1.top:8088/live/webcricsky/playlist.m3u8?vidictid=205706406274&id=121345&pk=d7d71624bbb8fe06530cb7b7f4763611da5e4267b60d553d7d7a10af44bf4e2cc9e3decb932bf3815fa230e92e2631e5eff378f257476de67451dc5397b9b942'], group: 'Sports', logo: 'https://i.imgur.com/pTWblYk.png' }
+        ];
+        renderChannels();
+        return;
+      }
+      
+      // FootyStream - multi-sport events
+      if (url === '__FOOTYSTREAM__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadFootyStream();
+        return;
+      }
+
+      // CricHD Channels - direct m3u8 from auto-updated playlist
+      if (url === '__CRICHD_PLAYLIST__') {
+        document.body.classList.add('playlist-mode');
+        document.body.classList.remove('crichd-mode');
+        loadCricHDPlaylist();
+        return;
+      }
+
+      // Stream RKO - live events from streamfree
+      if (url === '__STREAM_RKO__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadStreamRKO();
+        return;
+      }
+
+      // Watch IPL with Ads - show stream options
+      if (url === '__IPL_ADS__') {
+        document.body.classList.add('playlist-mode');
+        document.body.classList.remove('crichd-mode');
+        allChannels = [
+          { name: 'Star Sports 1', url: 'https://crichd.st/player.php?id=willow', group: 'IPL', logo: 'https://i.imgur.com/Js5Eg2V.png' },
+          { name: 'Star Sports 2', url: 'https://iplstreams.com/star-sports-2', group: 'IPL', logo: 'https://i.imgur.com/Js5Eg2V.png' },
+          { name: 'Willow TV', url: 'https://go.webcric.com/frame2.htm', group: 'IPL', logo: 'https://i.imgur.com/MzxqTMf.png' },
+          { name: 'Willow TV 2', url: 'https://go.webcric.com/frame9.htm', group: 'IPL', logo: 'https://i.imgur.com/eg7RgjP.png' },
+          { name: 'Sky Sports', url: 'https://go.webcric.com/frame7.htm', group: 'IPL', logo: 'https://i.imgur.com/pTWblYk.png' }
+        ];
+        channelListEl.innerHTML = '';
+        allChannels.forEach((ch, idx) => {
+          const div = document.createElement('div');
+          div.className = 'stream-link';
+          const logoHtml = ch.logo ? `<img src="${ch.logo}" style="height:30px;margin-right:8px;vertical-align:middle;">` : '';
+          div.innerHTML = `<div class="name">${logoHtml}${ch.name}</div><div class="quality">${ch.group}</div>`;
+          div.onclick = () => {
+            showFloatPlayer(ch.url, ch.name);
+            nowPlayingEl.innerHTML = `Playing: ${ch.name}`;
+          };
+          channelListEl.appendChild(div);
+        });
+        return;
+      }
+      
+      // ICC TV
+      if (url === '__ICC_TV__') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        loadICC();
+        return;
+      }
+
+      // Live Sports Channels from srhady/crichd-speical-live-event
+      if (url === '__LIVE_CHANNELS__') {
+        document.body.classList.add('playlist-mode');
+        document.body.classList.remove('crichd-mode');
+        loadLiveChannels();
+        return;
+      }
+
+      // Regular playlist URL
+      document.body.classList.add('playlist-mode');
+      document.body.classList.remove('crichd-mode');
+      isLiveMatchesMode = false;
+      
+      if (url) {
+        playlistUrlInput.value = '';
+        playlistUrlInput.placeholder = 'Loading channels...';
+        loadPlaylist(url);
+      }
+    }
+    
+    // Section cache for fast switching
+    const sectionCache = {};
+    const SECTION_CACHE_TTL = 30000;
+
+    function stopPlayer() {
+      if (typeof hls !== 'undefined' && hls) { hls.stopLoad(); hls.destroy(); hls = null; }
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+      const iframe = document.getElementById('yonoFrame');
+      if (iframe) { iframe.src = 'about:blank'; iframe.style.display = 'none'; }
+      closeModal();
+    }
+
+    function loadSection(source, loadFn) {
+      const grid = document.getElementById('liveMatchesGrid');
+      const cache = sectionCache[source];
+      if (cache && Date.now() - cache.time < SECTION_CACHE_TTL) {
+        grid.innerHTML = cache.html;
+        return;
+      }
+      if (cache) sectionCache[source] = null;
+      loadFn();
+    }
+
+    // Source tab switching
+    function switchSource(source) {
+      stopPlayer();
+      document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.source-tab[data-source="' + source + '"]').classList.add('active');
+      if (source === 'livechannels') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        document.getElementById('liveRefreshBtn').onclick = () => loadLiveChannels(true);
+        document.querySelector('.live-section-header h2').innerHTML = '<span class="live-dot"></span> Live Sports Channels';
+        loadSection(source, () => loadLiveChannels(true));
+      } else if (source === 'streamrko') {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        document.getElementById('liveRefreshBtn').onclick = loadStreamRKO;
+        document.querySelector('.live-section-header h2').innerHTML = '<span class="live-dot"></span> Stream RKO Live';
+        loadSection(source, loadStreamRKO);
+      } else {
+        document.body.classList.add('crichd-mode');
+        document.body.classList.remove('playlist-mode');
+        document.getElementById('liveRefreshBtn').onclick = loadCricHD;
+        document.querySelector('.live-section-header h2').innerHTML = '<span class="live-dot"></span> Live Sports';
+        loadSection(source, loadCricHD);
+      }
+    }
+    
+    function loadIplstreams(url, title) {
+nowPlayingEl.innerHTML = title + ' <button onclick="popOutIplstreams()" style="background:#4a9eff;border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;margin-left:10px;">Pop Out</button> <button onclick="pipIplstreams()" style="background:#4a9eff;border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;margin-left:5px;">🎬 PiP</button>';
+      
+      player.style.display = 'none';
+      let iframe = document.getElementById('yonoFrame');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'yonoFrame';
+        iframe.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
+        document.querySelector('.video-wrap').appendChild(iframe);
+        
+        // Try to remove ads after load
+        iframe.onload = () => {
+          try {
+            const doc = iframe.contentDocument;
+            // Hide common ad elements
+            const adSelectors = [
+              '.ads', '.ad', '[class*="ads-"]', '[id*="ads"]', 
+              '[class*="banner"]', '[id*="banner"]',
+              '[class*="sponsor"]', '[id*="sponsor"]',
+              '.google-ad', '.ad-container', '.ad-wrapper',
+              '[class*="popup"]', '[class*="modal"][class*="ad"]'
+            ];
+            adSelectors.forEach(sel => {
+              doc.querySelectorAll(sel).forEach(el => el.style.display = 'none');
+            });
+          } catch(e) {}
+        };
+      }
+      iframe.src = url;
+      iframe.style.display = 'block';
+      currentStreamUrl = url;
+    }
+    
+    let currentStreamUrl = '';
+    
+    function popOutIplstreams() {
+      if (currentStreamUrl) {
+        showFloatPlayer(currentStreamUrl, 'Stream');
+        document.getElementById('yonoFrame').style.display = 'none';
+        document.getElementById('yonoFrame').src = '';
+      }
+    }
+    
+    function pipIplstreams() {
+      const iframe = document.getElementById('yonoFrame');
+      if (!currentStreamUrl && iframe.src) {
+        currentStreamUrl = iframe.src;
+      }
+      if (currentStreamUrl) {
+        const pipWin = window.open(currentStreamUrl, 'pip', 'width=420,height=320,menubar=no,toolbar=no,location=no');
+        if (!pipWin) {
+          alert('Please allow popups to use PiP');
+        }
+      }
+    }
+
+    // Parse M3U
+    function parseM3U(text) {
+      const channels = [];
+      const lines = text.split(/\r?\n/);
+      let info = null;
+
+      for (const line of lines) {
+        const t = line.trim();
+        
+        if (t.startsWith('#EXTINF:') || t.startsWith('#EXTINF:-')) {
+          const parts = t.split(',');
+          const name = parts[1]?.trim() || 'Unknown';
+          const country = ((t.match(/tvg-country="([^"]*)"/) || [])[1] || '').toUpperCase();
+          const logo = (t.match(/tvg-logo="([^"]*)"/) || [])[1] || '';
+          const group = (t.match(/group-title="([^"]*)"/) || [])[1] || '';
+          info = { name, country, logo, group };
+        }
+        else if (info && !t.startsWith('#') && (t.includes('.m3u8') || t.includes('.m3u'))) {
+          // Generate logo URL if not provided
+          let logoUrl = info.logo;
+          if (!logoUrl || !logoUrl.startsWith('http')) {
+            const slug = info.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+            logoUrl = `https://raw.githubusercontent.com/iptv-org/logos/master/${info.country.toLowerCase()}/${slug}.png`;
+          }
+          channels.push({
+            ...info,
+            url: t,
+            logo: logoUrl
+          });
+          info = null;
+        }
+      }
+      return channels;
+    }
+
+    // Filter by category
+    function filterCategory(channels) {
+      if (activeCategory === 'all') return channels;
+      
+      const filters = {
+        'sports': /sports|cricket|football|soccer|espn|star|sony|bein|premier|laliga|bundesliga|serie|fox|sky|willow|ptv|golf|tennis|nba|nfl|hockey/i,
+        'news': /news|ndtv|abp|republic|aaj|tak|cnn|bbc|al|jazeera|times|now|india|tv18/i,
+        'movies': /movies|cinema|film|star|movie|bolawood|hollywood|bwood| Bolly/i,
+        'music': /music|mtun|hits|MTV|viva|channel.*v|song/i,
+        'entertainment': /entertainment|reality|tv|show|comedy|drama|star|life|zee|sony|colors/i,
+        'documentary': /documentary|discovery|national|geo|history|animal|planet/i
+      };
+      
+      const filter = filters[activeCategory];
+      if (!filter) return channels;
+      
+      return channels.filter(ch => 
+        filter.test(ch.name) || filter.test(ch.group)
+      );
+    }
+
+    // Render channels
+    function renderChannels() {
+      let filtered = allChannels;
+      
+      // Category filter
+      filtered = filterCategory(filtered);
+      
+      // Search filter
+      const search = searchInput.value.toLowerCase();
+      if (search) {
+        filtered = filtered.filter(ch => 
+          (ch.name || '').toLowerCase().includes(search) ||
+          (ch.country || '').toLowerCase().includes(search) ||
+          (ch.group || '').toLowerCase().includes(search)
+        );
+      }
+
+      channelListEl.innerHTML = '';
+      
+      if (filtered.length === 0) {
+        channelListEl.innerHTML = '<div class="loading">No channels found</div>';
+        return;
+      }
+
+      filtered.forEach(ch => {
+        const chUrl = ch.urls ? ch.urls[0] : ch.url;
+        const currentUrl = currentChannel ? (currentChannel.urls ? currentChannel.urls[0] : currentChannel.url) : null;
+        const div = document.createElement('div');
+        div.className = 'channel' + (currentUrl === chUrl ? ' playing' : '');
+        
+        const logoDiv = document.createElement('div');
+        logoDiv.className = 'logo';
+        
+        if (ch.logo && ch.logo.startsWith('http')) {
+          const img = document.createElement('img');
+          img.src = ch.logo;
+          img.onerror = () => {
+            logoDiv.innerHTML = `<span>${ch.logo}</span>`;
+          };
+          logoDiv.appendChild(img);
+        } else if (ch.logo) {
+          // Emoji logo
+          logoDiv.innerHTML = `<span style="font-size:24px">${ch.logo}</span>`;
+        } else {
+          logoDiv.innerHTML = `<span>${flags[ch.country] || (ch.name || '?')[0]}</span>`;
+        }
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'ch-info';
+        infoDiv.innerHTML = `<div class="ch-name">${ch.name || 'Unknown'}</div><div class="ch-country">${countries[ch.country] || ch.country || ch.group || ''}</div>`;
+        
+        div.appendChild(logoDiv);
+        div.appendChild(infoDiv);
+        div.onclick = () => playChannel(ch);
+        // Prefetch on hover (300ms delay)
+        let hoverTimer;
+        div.onmouseenter = () => {
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(() => {
+            if (ch.urls || ch.url) {
+              prefetchUrl(ch.urls ? ch.urls[0] : ch.url);
+            }
+          }, 300);
+        };
+        div.onmouseleave = () => clearTimeout(hoverTimer);
+        channelListEl.appendChild(div);
+      });
+    }
+
+    // Get stream URL
+
+// Play channel - fast switch with multiple URLs
+    let urlIndex = 0;
+    let autoSwitchTimer = null;
+    let playbackStarted = false;
+    function getChannelUrls(ch) {
+      return (ch.urls && ch.urls.length > 0) ? ch.urls : [ch.url, ch.fallback].filter(Boolean);
+    }
+    function clearAutoSwitchTimer() {
+      if (autoSwitchTimer) { clearTimeout(autoSwitchTimer); autoSwitchTimer = null; }
+    }
+    function startAutoSwitch(ch) {
+      clearAutoSwitchTimer();
+      playbackStarted = false;
+      autoSwitchTimer = setTimeout(() => {
+        if (!playbackStarted && currentChannel === ch) {
+          const urls = getChannelUrls(ch);
+          if (urlIndex < urls.length - 1) {
+            console.log('Auto-switching to URL ' + (urlIndex + 2));
+            urlIndex++;
+            playChannel(ch, urlIndex);
+          } else {
+            nowPlayingEl.innerHTML = `❌ All URLs failed: ${ch.name} <button onclick="retryChannel()" style="background:#e67e22;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-left:10px;">🔄 Retry</button>`;
+          }
+        }
+      }, 6000);
+    }
+    function playChannel(ch, newUrlIndex = null) {
+      const urls = getChannelUrls(ch);
+      
+      // New channel or explicit index given
+      if (newUrlIndex !== null) {
+        urlIndex = newUrlIndex;
+      } else if (!currentChannel || currentChannel.name !== ch.name) {
+        urlIndex = 0;
+      }
+      
+      currentChannel = ch;
+      
+      if (urlIndex >= urls.length) urlIndex = 0;
+      if (urlIndex < 0) urlIndex = 0;
+      
+      if (urls.length === 0) {
+        nowPlayingEl.innerHTML = `❌ No URLs: ${ch.name} <button onclick="retryChannel()" style="background:#e67e22;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-left:10px;">🔄 Retry</button>`;
+        return;
+      }
+      
+      const currentUrl = urls[urlIndex];
+      const label = urls.length > 1 ? ` [${urlIndex + 1}/${urls.length}]` : '';
+      const switchBtns = urls.length > 1 ? urls.map((u, i) => 
+        `<button onclick="switchUrl(${i})" style="background:${i === urlIndex ? '#4a9eff' : '#666'};border:none;color:#fff;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:5px;">${i + 1}</button>`
+      ).join('') : '';
+      
+      nowPlayingEl.innerHTML = `Playing: ${ch.name}${label} <button onclick="togglePiP()" style="background:#4a9eff;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-left:10px;">PiP</button>${switchBtns} <button onclick="retryChannel()" style="background:#666;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-left:5px;">🔄</button> <button onclick="toggleMiniPlayer()" style="background:#666;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-left:5px;">Mini</button>`;
+
+      // Save stream URL
+      if (typeof Android !== 'undefined') { try { Android.onVideoPlaying(currentUrl); } catch(e) {} }
+      try { localStorage.setItem('lastStreamUrl', currentUrl); } catch(e) {}
+      
+      // Fast cleanup
+      if (hls) { hls.stopLoad(); hls.destroy(); hls = null; }
+      player.pause();
+      player.removeAttribute('src');
+      player.load();
+      
+      // Hide iframe
+      let iframe = document.getElementById('yonoFrame');
+      if (iframe) { iframe.src = 'about:blank'; iframe.style.display = 'none'; }
+      player.style.display = 'block';
+      
+      // Mark playback when it starts
+      player.onplaying = () => { playbackStarted = true; clearAutoSwitchTimer(); };
+      player.oncanplay = () => { playbackStarted = true; clearAutoSwitchTimer(); };
+      
+      // Start 6s auto-switch timer
+      startAutoSwitch(ch);
+      
+      // Check if HLS.js is needed
+      if (currentUrl.includes('.m3u8')) {
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+          if (hls) { hls.destroy(); hls = null; }
+          hls = new Hls({
+            fragLoadingMaxRetry: 3,
+            manifestLoadingMaxRetry: 3,
+            startFragPrefetch: true,
+            lowLatencyMode: false,
+            backBufferLength: 30
+          });
+          hls.loadSource(currentUrl);
+          hls.attachMedia(player);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            playbackStarted = true;
+            clearAutoSwitchTimer();
+            player.play().catch(() => {});
+          });
+          hls.on(Hls.Events.ERROR, function(event, data) {
+            if (data.fatal) {
+              playbackStarted = false;
+              if (urlIndex < urls.length - 1) {
+                urlIndex++;
+                playChannel(ch, urlIndex);
+              } else {
+                clearAutoSwitchTimer();
+                nowPlayingEl.innerHTML = `❌ All URLs failed: ${ch.name} <button onclick="retryChannel()" style="background:#e67e22;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px;margin-left:10px;">🔄 Retry</button>`;
+              }
+            }
+          });
+          player.play().catch(() => {});
+        } else {
+          player.style.display = 'none';
+          if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'yonoFrame';
+            iframe.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+            iframe.setAttribute('allowfullscreen', '');
+            document.querySelector('.video-wrap').appendChild(iframe);
+          }
+          iframe.onload = () => { playbackStarted = true; clearAutoSwitchTimer(); };
+          iframe.src = currentUrl;
+          iframe.style.display = 'block';
+        }
+      } else if (currentUrl.includes('.ts') || (currentUrl.includes('/live/') && currentUrl.includes('?'))) {
+        player.style.display = 'none';
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.id = 'yonoFrame';
+          iframe.style.cssText = 'width:100%;height:calc(100vh - 120px);border:none;';
+          iframe.setAttribute('allowfullscreen', '');
+          document.querySelector('.video-wrap').appendChild(iframe);
+        }
+        iframe.onload = () => { playbackStarted = true; clearAutoSwitchTimer(); };
+        iframe.src = currentUrl;
+        iframe.style.display = 'block';
+      } else {
+        player.src = currentUrl;
+        player.play().catch(() => {});
+      }
+    }
+    
+    function switchUrl(idx) {
+      if (!currentChannel) return;
+      clearAutoSwitchTimer();
+      playbackStarted = false;
+      urlIndex = idx;
+      playChannel(currentChannel, urlIndex);
+    }
+    
+    function retryChannel() {
+      if (!currentChannel) return;
+      clearAutoSwitchTimer();
+      playbackStarted = false;
+      urlIndex = 0;
+      playChannel(currentChannel, 0);
+    }
+    
+// Picture-in-Picture (toggle)
+    async function togglePiP() {
+      if (document.pictureInPictureElement) {
+        document.exitPictureInPicture();
+      } else if (player.src || player.currentSrc) {
+        try {
+          player.autoPictureInPicture = true;
+          await player.requestPictureInPicture();
+        } catch(e) {
+          pipIplstreams();
+        }
+      }
+    }
+    
+    // Mini player mode
+    let miniMode = false;
+    function toggleMiniPlayer() {
+      miniMode = !miniMode;
+      const videoWrap = document.querySelector('.video-wrap');
+      if (miniMode) {
+        videoWrap.style.cssText = 'position:fixed;bottom:20px;right:20px;width:320px;height:180px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);border-radius:12px;overflow:hidden;';
+      } else {
+        videoWrap.style.cssText = '';
+      }
+    }
+    
+    // Retry all URLs from start
+    function retryChannel() {
+      if (currentChannel) {
+        urlIndex = 0;
+        playChannel(currentChannel);
+      }
+    }
+    
+    // Channel info overlay
+    function showChannelInfo() {
+      const wrap = document.querySelector('.video-wrap');
+      let info = document.getElementById('chInfo');
+      if (!info) {
+        info = document.createElement('div');
+        info.id = 'chInfo';
+        info.style.cssText = 'position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.7);color:#fff;padding:10px 15px;border-radius:8px;font-size:14px;z-index:100;';
+        wrap.appendChild(info);
+      }
+      info.innerHTML = `<strong>${currentChannel?.name || ''}</strong><br><small>Tap to show info</small>`;
+      info.style.display = 'block';
+      setTimeout(() => info.style.display = 'none', 3000);
+    }
+    player.addEventListener('loadedmetadata', showChannelInfo);
+    
+    // Setup MediaSession for auto-PiP on background
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('enterpictureinpicture', () => {
+        if (player.src || player.currentSrc) {
+          player.requestPictureInPicture();
+        }
+      });
+    }
+    
+    // Visibility change for auto-PiP
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && (player.src || player.currentSrc) && !document.pictureInPictureElement) {
+        try {
+          player.autoPictureInPicture = true;
+          player.requestPictureInPicture();
+        } catch(e) {}
+      }
+    });
+    
+    // Load playlist
+    async function loadPlaylist(urlOverride) {
+      const url = urlOverride || playlistUrlInput.value.trim();
+      if (!url) {
+        channelListEl.innerHTML = '<div class="loading" style="color:#ff0">⚠️ Select a source from the dropdown or paste an M3U URL above</div>';
+        return;
+      }
+      
+      // YonoTV - direct iframe, no playlist to fetch
+      if (url.includes('yonotv.pages.dev')) {
+        allChannels = [{ name: 'YonoTV Live', url: url, group: 'Live' }];
+        renderChannels();
+        return;
+      }
+      
+      channelListEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading channels...</div>';
+      
+      try {
+        let fetchUrl = url;
+        // Check if it's a direct m3u8 URL - play directly
+        if (url.endsWith('.m3u8') && (url.startsWith('http://') || url.includes('.'))) {
+          // Direct m3u8 - play directly without fetching playlist
+          allChannels = [{ name: 'Live Stream', url: url, group: 'Live', logo: '' }];
+          renderChannels();
+          return;
+        }
+        
+        // Use CORS proxy for other URLs
+        if (!url.includes(window.location.host) && !url.includes('localhost')) {
+          fetchUrl = url;
+        }
+        
+        const response = await fetch(fetchUrl);
+        if (!response.ok) throw new Error('Failed to fetch: ' + response.status);
+        
+        const text = await response.text();
+        if (!text || text.length < 100) throw new Error('Empty or invalid response');
+        
+        // Check if it's a direct HLS stream (live stream, not a channel list)
+        if (text.includes('#EXT-X-VERSION') || text.includes('#EXT-X-TARGETDURATION') || (!text.includes('#EXTINF:') && text.includes('.ts'))) {
+          // Direct HLS stream - play directly
+          allChannels = [{ name: 'Live Stream', url: url, group: 'Live', logo: '' }];
+          renderChannels();
+          return;
+        }
+        
+        allChannels = parseM3U(text);
+        
+        if (allChannels.length === 0) {
+          channelListEl.innerHTML = '<div class="loading">No channels found in playlist</div>';
+          return;
+        }
+        
+        // Sort by name
+        allChannels.sort((a, b) => a.name.localeCompare(b.name));
+        
+        renderChannels();
+      } catch (error) {
+        console.error('Error:', error);
+        channelListEl.innerHTML = `<div class="loading" style="color:#f55">Error: ${error.message}<br><br>Tip: Check console for details</div>`;
+      }
+    }
+
+    // Debounced search
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(renderChannels, 150);
+    });
+    
+    playlistUrlInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loadPlaylist();
+    });
+    
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeCategory = chip.dataset.cat;
+        renderChannels();
+      });
+    });
+
+    // Auto-load default playlist
+    // Countdown tick for today's matches
+    function tickCountdowns() {
+      document.querySelectorAll('.countdown-timer').forEach(el => {
+        const utc = parseInt(el.getAttribute('data-utc'));
+        if (!utc) { el.textContent = ''; return; }
+        const diff = utc - Date.now();
+        if (diff <= 0) {
+          // Replace countdown with live elapsed timer
+          const parent = el.closest('.cd-wrapper');
+          if (parent) parent.outerHTML = `<span class="live-elapsed" data-utc="${utc}"></span>`;
+          else el.outerHTML = `<span class="live-elapsed" data-utc="${utc}"></span>`;
+          return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        if (h > 0) el.textContent = `${h}h ${m}m ${s}s`;
+        else el.textContent = `${m}m ${s}s`;
+      });
+    }
+    setInterval(tickCountdowns, 1000);
+
+    function tickLiveElapsed() {
+      document.querySelectorAll('.live-elapsed').forEach(el => {
+        const utc = parseInt(el.getAttribute('data-utc'));
+        if (!utc) return;
+        const elapsed = Math.floor((Date.now() - utc) / 1000);
+        if (elapsed < 1) { el.textContent = ''; return; }
+        const h = Math.floor(elapsed / 3600);
+        const m = Math.floor((elapsed % 3600) / 60);
+        const s = elapsed % 60;
+        if (h > 0) el.textContent = `${h}h ${m}m ${s}s ago`;
+        else el.textContent = `${m}m ${s}s ago`;
+      });
+    }
+    setInterval(tickLiveElapsed, 1000);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        document.getElementById('presetSelect').value = '__CRICHD__';
+        switchSource('crichd');
+        // Warm up serverless functions
+        ['/api/hls-proxy?url=', '/api/crichd', '/api/live-channels', '/api/streamfree', '/api/footystream', '/api/crichd-proxy?url='].forEach(p => fetch(p).catch(() => {}));
+      } catch (e) {
+        console.error('Auto-load error:', e);
+        channelListEl.innerHTML = '<div class="loading" style="color:#f55">Error: ' + e.message + '</div>';
+      }
+    });
+    
+    // Floating Player Functions
+    let currentFloatUrl = '';
+    let isFloatVisible = false;
+    let floatHls = null;
+    let floatMuted = false;
+    
+    function toggleFloatPlayer() {
+      if (currentFloatUrl) {
+        showFloatPlayer(currentFloatUrl, document.getElementById('floatTitle').textContent || 'Stream');
+      }
+    }
+    
+    function showFloatPlayer(url, title, keepControls) {
+      if (url.indexOf('blob:') === 0) {
+        var video = document.querySelector('video');
+        if (video && video.currentSrc && video.currentSrc.indexOf('blob:') !== 0) {
+          url = video.currentSrc;
+        } else if (video && video.src && video.src.indexOf('blob:') !== 0) {
+          url = video.src;
+        }
+      }
+      if (window.location.protocol === 'file:' || window.Android) {
+        try {
+          var encoded = encodeURIComponent(url);
+          var encTitle = encodeURIComponent(title || 'Stream');
+          window.location.href = 'rko://floating?url=' + encoded + '&title=' + encTitle;
+          return;
+        } catch(e) {}
+      }
+      currentFloatUrl = url;
+      isFloatVisible = true;
+      const floatPlayer = document.getElementById('floatPlayer');
+      const floatIframe = document.getElementById('floatIframe');
+      const floatVideo = document.getElementById('floatVideo');
+      const floatTitle = document.getElementById('floatTitle');
+      const toggleBtn = document.getElementById('floatToggleBtn');
+      
+      toggleBtn.style.display = 'none';
+      floatPlayer.style.display = 'block';
+      floatPlayer.classList.remove('collapsed');
+      floatTitle.textContent = title || 'Stream';
+      
+      // Position external close button at top-right of float player
+      var floatCloseBtn = document.getElementById('floatCloseBtn');
+      floatCloseBtn.style.display = 'flex';
+      var rect = floatPlayer.getBoundingClientRect();
+      floatCloseBtn.style.top = (rect.top - 12) + 'px';
+      floatCloseBtn.style.left = (rect.right - 16) + 'px';
+      // Re-position on resize/move
+      floatPlayer._posInterval = setInterval(function() {
+        var r = floatPlayer.getBoundingClientRect();
+        floatCloseBtn.style.top = (r.top - 12) + 'px';
+        floatCloseBtn.style.left = (r.right - 16) + 'px';
+      }, 200);
+      
+      // Setup drag handle
+      var dragHandle = document.getElementById('floatDragHandle');
+      var resizeHandle = document.getElementById('floatResizeHandle');
+      var dragData = {};
+      dragHandle.onmousedown = dragHandle.ontouchstart = function(e) {
+        e.preventDefault();
+        var touch = e.touches ? e.touches[0] : e;
+        dragData.initialX = floatPlayer.offsetLeft;
+        dragData.initialY = floatPlayer.offsetTop;
+        dragData.touchX = touch.clientX;
+        dragData.touchY = touch.clientY;
+        function onMove(ev) {
+          var t = ev.touches ? ev.touches[0] : ev;
+          floatPlayer.style.left = (dragData.initialX + t.clientX - dragData.touchX) + 'px';
+          floatPlayer.style.top = (dragData.initialY + t.clientY - dragData.touchY) + 'px';
+          floatPlayer.style.right = 'auto';
+          floatPlayer.style.bottom = 'auto';
+        }
+        function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        document.addEventListener('touchmove', onMove, {passive:true});
+        document.addEventListener('touchend', onUp);
+      };
+      // Setup resize handle
+      var resizeData = {};
+      resizeHandle.onmousedown = resizeHandle.ontouchstart = function(e) {
+        e.preventDefault();
+        var touch = e.touches ? e.touches[0] : e;
+        resizeData.initialW = floatPlayer.offsetWidth;
+        resizeData.initialH = floatPlayer.offsetHeight;
+        resizeData.touchX = touch.clientX;
+        resizeData.touchY = touch.clientY;
+        function onMove(ev) {
+          var t = ev.touches ? ev.touches[0] : ev;
+          var w = Math.max(280, resizeData.initialW + t.clientX - resizeData.touchX);
+          var h = Math.max(200, resizeData.initialH + t.clientY - resizeData.touchY);
+          floatPlayer.style.width = w + 'px';
+          floatPlayer.style.height = h + 'px';
+        }
+        function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        document.addEventListener('touchmove', onMove, {passive:true});
+        document.addEventListener('touchend', onUp);
+      };
+      
+      if (keepControls) {
+        floatPlayer.classList.add('keep-controls');
+        floatPlayer.classList.remove('no-controls');
+      } else {
+        floatPlayer.classList.remove('keep-controls');
+        floatPlayer.onmouseenter = function() { floatPlayer.classList.remove('no-controls'); };
+        floatPlayer.onmouseleave = function() { floatPlayer.classList.add('no-controls'); };
+      }
+      
+      if (url.includes('.mp4')) {
+        floatIframe.style.display = 'none';
+        floatVideo.style.display = 'block';
+        if (floatHls) { floatHls.destroy(); floatHls = null; }
+        floatVideo.pause();
+        floatVideo.removeAttribute('src');
+        floatVideo.load();
+        floatVideo.style.width = '100%';
+        floatVideo.style.height = '100%';
+        floatVideo.crossOrigin = 'anonymous';
+        floatVideo.src = url;
+        floatVideo.play().catch(function(e) {
+          console.log('ICC MP4 play error', e);
+        });
+        floatVideo.onerror = function() {
+          nowPlayingEl.innerHTML = '<span style="color:#ff6b6b;">⚠ Playback error. <a href="' + esc(url) + '" target="_blank" style="color:#4a9eff;" rel="noopener">Open in browser</a></span>';
+        };
+        floatVideo.addEventListener('loadedmetadata', function() {
+          if (!keepControls) {
+            setTimeout(function() { floatPlayer.classList.add('no-controls'); }, 3000);
+          }
+        }, { once: true });
+      } else if (url.includes('.m3u8') || url.startsWith('blob:') || url.includes('/api/streamfree-direct') || url.includes('/api/hls-proxy') || url.includes('/api/crichd-proxy')) {
+        floatIframe.style.display = 'none';
+        floatVideo.style.display = 'block';
+        if (floatHls) { floatHls.destroy(); floatHls = null; }
+        floatVideo.pause();
+        floatVideo.removeAttribute('src');
+        floatVideo.load();
+        
+        var canNativeHls = floatVideo.canPlayType('application/vnd.apple.mpegurl');
+        
+        // For direct CDN URLs (not via proxy), try native playback first (no CORS issues on mobile)
+        if (url.startsWith('http') && !url.includes('/api/') && canNativeHls) {
+          floatVideo.crossOrigin = 'anonymous';
+          floatVideo.src = url;
+          floatVideo.onerror = function() {
+            nowPlayingEl.innerHTML = 'Playback error - stream may be unavailable';
+          };
+          floatVideo.addEventListener('loadedmetadata', function() {
+            floatVideo.play().catch(function() {});
+            if (!keepControls) {
+              setTimeout(function() { floatPlayer.classList.add('no-controls'); }, 3000);
+            }
+          });
+        } else if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+          floatHls = new Hls({fragLoadingMaxRetry: 6, manifestLoadingMaxRetry: 6});
+          floatHls.loadSource(url);
+          floatHls.attachMedia(floatVideo);
+          floatHls.on(Hls.Events.MANIFEST_PARSED, function() {
+            floatVideo.play().catch(function() {});
+            if (!keepControls) {
+              setTimeout(function() { floatPlayer.classList.add('no-controls'); }, 3000);
+            }
+          });
+          floatHls.on(Hls.Events.ERROR, function(event, data) {
+            console.error('HLS error:', data);
+            if (data.fatal) {
+              var errMsg = 'HLS: ' + (data.details || 'unknown');
+              if (data.reason) errMsg += ' - ' + data.reason;
+              if (data.response) errMsg += ' [' + data.response.code + ']';
+              nowPlayingEl.innerHTML = errMsg;
+            }
+          });
+        } else if (canNativeHls) {
+          floatVideo.src = url;
+          floatVideo.addEventListener('loadedmetadata', function() {
+            floatVideo.play().catch(function() {});
+            if (!keepControls) {
+              setTimeout(function() { floatPlayer.classList.add('no-controls'); }, 3000);
+            }
+          });
+        }
+      } else {
+        floatVideo.style.display = 'none';
+        floatIframe.style.display = 'block';
+        floatIframe.src = url;
+      }
+    }
+    
+    function hideFloat() {
+      const floatPlayer = document.getElementById('floatPlayer');
+      const toggleBtn = document.getElementById('floatToggleBtn');
+      const floatCloseBtn = document.getElementById('floatCloseBtn');
+      floatPlayer.style.display = 'none';
+      toggleBtn.style.display = 'block';
+      floatCloseBtn.style.display = 'none';
+      isFloatVisible = false;
+      if (floatPlayer._posInterval) { clearInterval(floatPlayer._posInterval); floatPlayer._posInterval = null; }
+    }
+    
+    function openSizeMenu() {
+      var menu = document.getElementById('floatSizeMenu');
+      menu.classList.toggle('show');
+    }
+    
+    function setFloatSize(size) {
+      var fp = document.getElementById('floatPlayer');
+      fp.classList.remove('size-small', 'size-medium', 'size-large', 'fullscreen');
+      fp.classList.add('size-' + size);
+      fp.style.width = '';
+      fp.style.height = '';
+      document.getElementById('floatSizeMenu').classList.remove('show');
+    }
+    
+    function toggleFullscreen() {
+      var fp = document.getElementById('floatPlayer');
+      var video = document.getElementById('floatVideo');
+      var iframe = document.getElementById('floatIframe');
+      if (fp.classList.contains('fullscreen')) {
+        fp.classList.remove('fullscreen');
+        fp.style.cssText = '';
+        fp.classList.add('size-medium');
+        exitNativeFullscreen();
+      } else {
+        fp.classList.remove('collapsed');
+        fp.classList.add('fullscreen');
+        fp.style.cssText = 'display:block;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;';
+        // Use native fullscreen API for proper landscape on mobile
+        var el = (video && video.style.display !== 'none') ? video : (iframe && iframe.style.display === 'block' ? iframe : null);
+        if (el) {
+          requestNativeFullscreen(el);
+        } else {
+          requestNativeFullscreen(fp);
+        }
+      }
+    }
+
+    function requestNativeFullscreen(el) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+
+    function exitNativeFullscreen() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+      else if (document.msFullscreenElement) document.msExitFullscreen();
+    }
+
+    // Sync CSS fullscreen class with native fullscreen changes
+    document.addEventListener('fullscreenchange', syncFullscreenClass);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenClass);
+    document.addEventListener('msfullscreenchange', syncFullscreenClass);
+    function syncFullscreenClass() {
+      var fp = document.getElementById('floatPlayer');
+      var inFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+      if (!inFullscreen && fp.classList.contains('fullscreen')) {
+        fp.classList.remove('fullscreen');
+        fp.style.cssText = '';
+        fp.classList.add('size-medium');
+      }
+    }
+    
+    function minimizeFloat() {
+      var fp = document.getElementById('floatPlayer');
+      fp.classList.toggle('collapsed');
+    }
+    
+    function toggleFloatMute() {
+      var fv = document.getElementById('floatVideo');
+      var btn = document.getElementById('floatMuteBtn');
+      floatMuted = !floatMuted;
+      if (fv) { fv.muted = floatMuted; }
+      btn.textContent = floatMuted ? '🔇' : '🔊';
+    }
+    
+    async function floatPip() {
+      var floatVideo = document.getElementById('floatVideo');
+      if (floatVideo && floatVideo.style.display !== 'none' && floatVideo.src) {
+        try { await floatVideo.requestPictureInPicture(); return; } catch(e) {}
+      }
+      if (currentFloatUrl) {
+        showFloatPlayer(currentFloatUrl, document.getElementById('floatTitle').textContent || 'Stream');
+      }
+    }
+    
+    // Close size menu on outside click
+    document.addEventListener('click', function(e) {
+      var menu = document.getElementById('floatSizeMenu');
+      if (menu.classList.contains('show') && !e.target.closest('.float-size-menu') && !e.target.closest('[onclick="openSizeMenu()"]')) {
+        menu.classList.remove('show');
+      }
+    });
+    
+    // Floating Player Drag
+    var fp = document.getElementById('floatPlayer');
+    var fc = fp.querySelector('.float-controls');
+    var isDragging = false, dragStartX, dragStartY, dragInitX, dragInitY;
+    
+    fc.addEventListener('mousedown', function(e) {
+      if (fp.classList.contains('fullscreen')) return;
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      var rect = fp.getBoundingClientRect();
+      dragInitX = rect.left;
+      dragInitY = rect.top;
+      fp.style.right = 'auto';
+      fp.style.bottom = 'auto';
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      fp.style.left = (dragInitX + e.clientX - dragStartX) + 'px';
+      fp.style.top = (dragInitY + e.clientY - dragStartY) + 'px';
+    });
+    document.addEventListener('mouseup', function() { isDragging = false; });
+    
+    fc.addEventListener('touchstart', function(e) {
+      if (fp.classList.contains('fullscreen')) return;
+      isDragging = true;
+      dragStartX = e.touches[0].clientX;
+      dragStartY = e.touches[0].clientY;
+      var rect = fp.getBoundingClientRect();
+      dragInitX = rect.left;
+      dragInitY = rect.top;
+      fp.style.right = 'auto';
+      fp.style.bottom = 'auto';
+    });
+    document.addEventListener('touchmove', function(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      fp.style.left = (dragInitX + e.touches[0].clientX - dragStartX) + 'px';
+      fp.style.top = (dragInitY + e.touches[0].clientY - dragStartY) + 'px';
+    }, { passive: false });
+    document.addEventListener('touchend', function() { isDragging = false; });
+    
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(r => console.log('SW registered')).catch(e => console.log('SW error', e));
+    }
+
+    // PiP Mode Detection
+    function checkPipMode() {
+      if (window.innerHeight < 300 && window.innerWidth < 500) {
+        document.body.classList.add('pip-mode');
+      } else {
+        document.body.classList.remove('pip-mode');
+      }
+    }
+    window.addEventListener('resize', checkPipMode);
+    checkPipMode();
+
+    // Report current stream URL to Android for floating player
+    setInterval(function() {
+      var video = document.querySelector('video');
+      if (video && video.src) {
+        if (typeof Android !== 'undefined') {
+          Android.onVideoPlaying(video.src);
+        }
+      }
+      var iframe = document.getElementById('yonoFrame');
+      if (iframe && iframe.src && iframe.style.display !== 'none') {
+        if (typeof Android !== 'undefined') {
+          Android.onVideoPlaying(iframe.src);
+        }
+      }
+    }, 1000);
+  </script>
+
+  <div style="text-align:center;padding:20px 16px 10px;border-top:1px solid rgba(255,255,255,0.08);margin-top:20px;">
+    <div style="font-size:13px;margin-bottom:8px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+      <a href="/terms.html" style="color:#4a9eff;text-decoration:none;">Terms of Service</a>
+      <a href="/dmca.html" style="color:#4a9eff;text-decoration:none;">DMCA</a>
+      <a href="/privacy.html" style="color:#4a9eff;text-decoration:none;">Privacy Policy</a>
+    </div>
+    <div id="rkoPowered" style="font-size:15px;">
+      Powered By ❤️‍🩹 HIMAL (<a href="https://www.instagram.com/himalpaudel_" target="_blank" style="color:inherit;text-decoration:none;font-weight:600;">RKO BRO💌</a>)
+    </div>
+    <div id="rkoCopyright" style="font-size:13px;margin-top:6px;">
+      © 2026. All rights reserved.
+    </div>
+  </div>
+  <script>
+  (function(){
+    var colors = ['#ff0000','#ff6600','#ffff00','#00cc00','#0066ff','#8800ff'];
+    function rainbow(el){
+      if(!el || el.rainbowDone) return;
+      el.rainbowDone = true;
+      var html = el.innerHTML;
+      var parts = [];
+      var inTag = false, buf = '';
+      for(var k = 0; k < html.length; k++){
+        var ch = html[k];
+        if(ch === '<'){ inTag = true; if(buf){ parts.push({t:0,v:buf}); buf=''; } buf+=ch; }
+        else if(ch === '>'){ buf+=ch; parts.push({t:1,v:buf}); buf=''; inTag=false; }
+        else if(!inTag){ buf+=ch; }
+        else { buf+=ch; }
+      }
+      if(buf) parts.push(inTag?{t:1,v:buf}:{t:0,v:buf});
+      var out = '';
+      var wi = 0;
+      parts.forEach(function(p){
+        if(p.t === 1){ out += p.v; }
+        else {
+          var words = p.v.split(/(\s+)/);
+          words.forEach(function(w){
+            if(w.length > 0){
+              out += '<span class="rc" data-w="'+wi+'" style="transition:color 0.4s">'+w+'</span>';
+              wi++;
+            }
+          });
+        }
+      });
+      el.innerHTML = out;
+    }
+    rainbow(document.getElementById('rkoPowered'));
+    rainbow(document.getElementById('rkoCopyright'));
+    var offset = 0;
+    setInterval(function(){
+      var all = document.querySelectorAll('.rc');
+      for(var j = 0; j < all.length; j++){
+        var idx = parseInt(all[j].getAttribute('data-w'));
+        all[j].style.color = colors[(idx + offset) % colors.length];
+      }
+      offset++;
+    }, 400);
+  })();
+  </script>
+</body>
+</html>

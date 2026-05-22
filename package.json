@@ -1,0 +1,8 @@
+{
+  "name": "rko-tv",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "mongodb": "^6.12.0"
+  }
+}

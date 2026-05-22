@@ -1,0 +1,21 @@
+{
+  "name": "RKO LIVE TV",
+  "short_name": "RKO TV",
+  "description": "Watch live sports streaming",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#e63946",
+  "orientation": "any",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["entertainment", "sports"]
+}
