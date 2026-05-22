@@ -399,20 +399,6 @@
       }
     });
     
-    // Heartbeat - live user tracking
-    (function(){
-      var sid = '';
-      try { sid = localStorage.getItem('hb_sid') || crypto.randomUUID(); localStorage.setItem('hb_sid', sid); } catch(e) { sid = 'anon_' + Date.now(); }
-      var hbPage = window.location.pathname;
-      function sendHeartbeat(playing) {
-        fetch('/api/heartbeat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ sessionId:sid, page: playing ? hbPage + ' (playing)' : hbPage }) }).catch(function(){});
-      }
-      sendHeartbeat(false);
-      setInterval(function(){ sendHeartbeat(false); }, 30000);
-      var origPlay = HTMLVideoElement.prototype.play;
-      HTMLVideoElement.prototype.play = function() { sendHeartbeat(true); return origPlay.apply(this, arguments); };
-      document.addEventListener('playing', function(){ sendHeartbeat(true); }, true);
-    })();
 
     const player = document.getElementById('player');
     const channelListEl = document.getElementById('channelList');
