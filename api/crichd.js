@@ -4,11 +4,13 @@ const http = require('http');
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0';
 const C_TOP = 'https://crichd.top';
 const P_ADO = 'https://playerado.top';
+const B_CAST = 'https://bhalocast.com';
+const EX_SHIP = 'https://executeandship.com';
 const S_LIVE = 'https://raw.githubusercontent.com/srhady/crichd-speical-live-event/main';
 const C_LIVE = 'https://raw.githubusercontent.com/srhady/CricketLive/main';
 const Z_CDN = 'https://zohanayaan.com:1686';
 
-const cache = { matches: null, tM: 0, snMap: null, tS: 0, strCache: {} };
+const cache = { matches: null, tM: 0, strCache: {}, chMap: null, tC: 0 };
 const TTL = 30000, STTL = 120000;
 
 function fetch(url, opts = {}) {
@@ -34,57 +36,43 @@ function fetch(url, opts = {}) {
   });
 }
 
-// ── srhady slug→numeric channel map ──
-async function buildChannelMap() {
-  if (cache.snMap && Date.now() - cache.tS < 120000) return cache.snMap;
-  const map = {};
+function extractChars(data) {
+  const m = data.match(/return\s*\(\[([\s\S]*?)\]\.join/);
+  if (!m) return null;
+  const parts = m[1].match(/"([^"]*)"/g);
+  if (!parts) return null;
+  return parts.map(p => p.replace(/"/g, '')).join('').replace(/\\\//g, '/');
+}
+
+// ── Built-in channel map from srhady data ──
+async function buildChMap() {
+  if (cache.chMap && Date.now() - cache.tC < 120000) return cache.chMap;
+  const m = {};
   try {
-    // Fetch playlist.m3u for numeric IDs
+    const { text: je } = await fetch(`${S_LIVE}/Live_Events.json`);
+    for (const ev of (JSON.parse(je).matches || [])) {
+      const fid = (ev.embed || '').match(/id=([^&]+)/);
+      const cid = (ev.channel_id || '').match(/(\d+)/);
+      if (fid && cid) m[fid[1]] = { n: ev.title || '', c: cid[1] };
+    }
     const { text: m3u } = await fetch(`${S_LIVE}/playlist.m3u`);
+    let cur = {};
     for (const line of m3u.split('\n')) {
       const t = line.trim();
       if (t.startsWith('#EXTINF:')) {
-        const name = t.replace(/.*?,[\s]*(.*)/, '$1').trim();
-        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '');
-        map[slug] = { name };
-      } else if (t && !t.startsWith('#') && !t.startsWith('#EXT')) {
-        const m = t.match(/zohanayaan\.com:1686\/live\/(\d+)\.m3u8/);
-        if (m) {
-          const ch = m[1];
-          for (const key of Object.keys(map)) {
-            if (!map[key].id) map[key].id = ch;
-          }
-          map[`ch${ch}`] = { name: `Channel ${ch}`, id: ch };
-        }
+        cur = { name: t.replace(/.*?,[\s]*(.*)/, '$1').trim() };
+      } else if (t && !t.startsWith('#')) {
+        const z = t.match(/zohanayaan\.com:1686\/live\/(\d+)\.m3u8/);
+        if (z) cur.cid = z[1];
       }
     }
-    // Fetch Live_Events.json for embed→channel_id mapping
-    const { text: je } = await fetch(`${S_LIVE}/Live_Events.json`);
-    const events = JSON.parse(je).matches || [];
-    for (const ev of events) {
-      const fid = (ev.embed || '').match(/id=([^&]+)/);
-      const chId = (ev.channel_id || '').match(/(\d+)/);
-      if (fid && chId) map[fid[1]] = { name: ev.title || '', id: chId[1] };
-    }
-    // Fetch Footy data too
-    try {
-      const { text: fj } = await fetch(`${S_LIVE}/Footy_Live.json`);
-      const fEvents = JSON.parse(fj).matches || [];
-      for (const ev of fEvents) {
-        const fid = (ev.embed || '').match(/id=([^&]+)/);
-        const chId = (ev.channel_id || '').match(/(\d+)/);
-        if (fid && chId && !map[fid[1]]) map[fid[1]] = { name: ev.title || '', id: chId[1] };
-      }
-    } catch {}
   } catch {}
-  cache.snMap = map;
-  cache.tS = Date.now();
-  return map;
+  cache.chMap = m; cache.tC = Date.now();
+  return m;
 }
 
-function zohanayaanUrl(chId) {
-  const ts = Math.floor(Date.now() / 1000);
-  return { url: `${Z_CDN}/live/${chId}.m3u8?md5=${ts}&token=1`, referer: 'https://teachtrendhub.com/' };
+function zUrl(cid) {
+  return { url: `${Z_CDN}/live/${cid}.m3u8?md5=${Math.floor(Date.now()/1000)}&token=1`, ref: 'https://teachtrendhub.com/' };
 }
 
 // ── Match scraping ──
@@ -126,15 +114,15 @@ async function scrapeServers(matchUrl) {
   return servers;
 }
 
-// ── Get fid from any server URL ──
-async function resolveFid(serverUrl) {
-  let target = serverUrl;
+// ── FID extraction from server URL ──
+async function getFid(serverUrl) {
+  let ifUrl = serverUrl;
   if (serverUrl.includes('dadocric.st')) {
     const { text } = await fetch(serverUrl, { headers: { Referer: C_TOP + '/' } });
     const m = text.match(/iframe[^>]+src=["'](https?:\/\/[^"']+)["']/i);
-    if (m) target = m[1];
+    if (m) ifUrl = m[1];
   }
-  const { text } = await fetch(target, { headers: { Referer: serverUrl } });
+  const { text } = await fetch(ifUrl, { headers: { Referer: serverUrl } });
   return {
     fid: (text.match(/fid="([^"]*)"/) || [])[1],
     v_con: (text.match(/v_con=["'](.*?)["']/) || [])[1] || '',
@@ -142,19 +130,69 @@ async function resolveFid(serverUrl) {
   };
 }
 
-// ── Channel ID from slug using srhady map + me.crichd.tv ──
-async function channelIdFromSlug(slug) {
-  const map = await buildChannelMap();
-  if (map[slug] && map[slug].id) return map[slug].id;
-  // Try fuzzy match
-  for (const [k, v] of Object.entries(map)) {
-    if (v.id && (k.includes(slug) || slug.includes(k))) return v.id;
+// ── Method 1: executeandship premiumcr.php character array ──
+async function m1(fid) {
+  try {
+    const { text } = await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${fid}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+    const url = extractChars(text);
+    if (url && url.includes('.m3u8')) return { url, method: 'exship' };
+  } catch {}
+  return null;
+}
+
+// ── Method 2: streamcrichd -> executeandship chain ──
+async function m2() {
+  try {
+    const { text } = await fetch(`https://streamcrichd.com/update/willowcricket.php`, { headers: { Referer: 'https://streamcrichd.com/' }, timeout: 10000 });
+    const f2 = (text.match(/fid=(["\'])([^"\']+)\1/) || [])[2];
+    if (f2) {
+      await fetch(`https:${EX_SHIP}/premium.js`, { headers: { Referer: EX_SHIP + '/' }, timeout: 8000 }).catch(() => {});
+      const { text: pText } = await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${f2}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+      const url = extractChars(pText);
+      if (url && url.includes('.m3u8')) return { url, method: 'streamcrichd' };
+    }
+  } catch {}
+  return null;
+}
+
+// ── Method 3: pzo.php (CloudStream 3) ──
+async function m3(fid, v_con, v_dt) {
+  try {
+    const { text } = await fetch(`${B_CAST}/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt||'123456'}`, { headers: { Referer: P_ADO + '/' }, timeout: 10000 });
+    const u = extractChars(text) || (text.match(/["'](https?:\/\/[^"']*?m3u8[^"']*?)["']/) || [])[1];
+    if (u) return { url: u.replace(/\\\//g, '/'), method: 'pzo' };
+  } catch {}
+  return null;
+}
+
+// ── Method 4: srhady channel map -> zohanayaan CDN ──
+async function m4(fid) {
+  const map = await buildChMap();
+  if (map[fid] && map[fid].c) {
+    const { url, ref } = zUrl(map[fid].c);
+    try { const t = await fetch(url, { headers: { Referer: ref }, timeout: 5000 }); if (t.status === 200 || t.status === 206) return { url, referer: ref, method: 'z-cdn' }; } catch {}
+    return { url, referer: ref, method: 'z-cdn-best' };
+  }
+  for (const [, v] of Object.entries(map)) {
+    if (!v.c) continue;
+    const { url, ref } = zUrl(v.c);
+    try { const t = await fetch(url, { headers: { Referer: ref }, timeout: 3000 }); if (t.status === 200 || t.status === 206) return { url, referer: ref, method: 'z-cdn-scan' }; } catch {}
   }
   return null;
 }
 
-// ── Try CricketLive repo ──
-async function tryCricketLive(title) {
+// ── Method 5: scan known zohanayaan channel IDs ──
+async function m5() {
+  const ids = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,50,51,52,53,54,55,56,57,58,59,60,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,200,201,202,203,300,301,302,303,500,501,502,503,504,505,506];
+  for (const cid of ids) {
+    const { url, ref } = zUrl(cid);
+    try { const t = await fetch(url, { headers: { Referer: ref }, timeout: 2000 }); if (t.status === 200 || t.status === 206) return { url, referer: ref, method: `z-scan-${cid}` }; } catch {}
+  }
+  return null;
+}
+
+// ── Method 6: CricketLive repo ──
+async function m6(title) {
   if (!title) return null;
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   for (const pre of ['', 'live-', 'stream-']) {
@@ -162,87 +200,48 @@ async function tryCricketLive(title) {
       const { text } = await fetch(`https://raw.githubusercontent.com/srhady/CricketLive/main/${pre}${slug}.m3u8`, { timeout: 5000 });
       if (text) {
         const fl = text.split('\n').find(l => l.trim() && !l.startsWith('#'));
-        if (fl && fl.includes('.m3u8')) return { url: fl.trim(), referer: 'https://teachtrendhub.com/' };
+        if (fl && fl.includes('.m3u8')) return { url: fl.trim(), referer: 'https://teachtrendhub.com/', method: 'cricket-live' };
       }
     } catch {}
   }
   return null;
 }
 
-// ── Main stream resolution ──
-async function resolveStream(serverUrl, matchTitle) {
-  const ck = serverUrl + (matchTitle || '');
+// ── Main resolver ──
+async function resolve(serverUrl, title) {
+  const ck = serverUrl + (title || '');
   if (cache.strCache[ck] && Date.now() - cache.strCache[ck].time < STTL) return cache.strCache[ck].data;
 
-  const { fid, v_con, v_dt } = await resolveFid(serverUrl);
+  const { fid, v_con, v_dt } = await getFid(serverUrl);
   if (!fid) return null;
 
-  // Step 1: Try CricketLive direct CDN
-  const cl = await tryCricketLive(matchTitle);
-  if (cl) { const d = { ...cl, method: 'cricket-live' }; cache.strCache[ck] = { data: d, time: Date.now() }; return d; }
+  let r = fid ? (await m1(fid)) : null;
+  if (!r) r = await m2();
+  if (!r && fid) r = await m3(fid, v_con, v_dt);
+  if (!r && fid) r = await m4(fid);
+  if (!r) r = await m5();
+  if (!r) r = await m6(title);
 
-  // Step 2: Build zohanayaan CDN URL from fid→channel_id mapping
-  const chId = await channelIdFromSlug(fid);
-  if (chId) {
-    const { url, referer } = zohanayaanUrl(chId);
-    // Verify the URL works (check if CDN responds)
-    try {
-      const test = await fetch(url, { headers: { Referer: referer }, timeout: 5000 });
-      if (test.status === 200 || test.status === 206) {
-        const d = { url, referer, method: 'zohanayaan' };
-        cache.strCache[ck] = { data: d, time: Date.now() };
-        return d;
-      }
-      // If 403, try with a different timestamp
-      const { url: url2 } = zohanayaanUrl(chId);
-      const d = { url: url2, referer, method: 'zohanayaan' };
-      cache.strCache[ck] = { data: d, time: Date.now() };
-      return d;
-    } catch {
-      // CDN might be down, still return the URL as best effort
-      const d = { url, referer, method: 'zohanayaan-best' };
-      cache.strCache[ck] = { data: d, time: Date.now() };
-      return d;
-    }
-  }
-
-  // Step 3: Try common channel IDs
-  const commonIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 200, 201, 202, 203, 300, 301, 302, 303, 500, 501, 502, 503, 504, 505, 506];
-  for (const cid of commonIds) {
-    const { url, referer } = zohanayaanUrl(cid);
-    try {
-      const test = await fetch(url, { headers: { Referer: referer }, timeout: 3000 });
-      if (test.status === 200 || test.status === 206) {
-        const d = { url, referer, method: `zohanayaan-scan-${cid}` };
-        cache.strCache[ck] = { data: d, time: Date.now() };
-        // Cache the mapping
-        const map = await buildChannelMap();
-        map[fid] = { name: matchTitle || fid, id: String(cid) };
-        return d;
-      }
-    } catch {}
-  }
-
-  // Step 4: Return fid for client-side
+  if (r) { cache.strCache[ck] = { data: r, time: Date.now() }; return r; }
   const d = { fid, v_con, v_dt, method: 'client-fallback' };
   cache.strCache[ck] = { data: d, time: Date.now() };
   return d;
 }
 
-// ── Inline proxy for m3u8/TS ──
-async function proxyStream(url, referer) {
+// ── Proxy ──
+async function doProxy(url, referer) {
   const resp = await fetch(url, { headers: { Referer: referer || 'https://teachtrendhub.com/' } });
   const ct = resp.headers['content-type'] || '';
   if (ct.includes('mpegurl') || ct.includes('apple') || url.includes('.m3u8')) {
     const base = url.substring(0, url.lastIndexOf('/') + 1);
     const ref = referer || 'https://teachtrendhub.com/';
-    const lines = resp.text.split('\n').map(line => {
+    const body = resp.text.split('\n').map(line => {
       const t = line.trim();
       if (t && !t.startsWith('#') && !t.startsWith('http'))
         return `/api/crichd?action=proxy&url=${encodeURIComponent(base + t)}&referer=${encodeURIComponent(ref)}`;
       return line;
     }).join('\n');
-    return { type: 'application/vnd.apple.mpegurl', body: lines };
+    return { type: 'application/vnd.apple.mpegurl', body };
   }
   return { type: ct || 'video/mp2t', body: resp.text };
 }
@@ -261,51 +260,33 @@ module.exports = async (req, res) => {
     if (action === 'proxy') {
       const url = req.query.url;
       if (!url) return res.status(400).json({ error: 'Missing url' });
-      const { type, body } = await proxyStream(url, req.query.referer);
+      const { type, body } = await doProxy(url, req.query.referer);
       res.setHeader('Content-Type', type);
       res.setHeader('Cache-Control', 'public, max-age=2');
       return res.status(200).send(body);
     }
 
     if (action === 'servers' && matchUrl) {
-      const s = await scrapeServers(matchUrl.startsWith('http') ? matchUrl : C_TOP + matchUrl);
-      return res.json({ success: true, servers: s, total: s.length });
+      return res.json({ success: true, servers: await scrapeServers(matchUrl.startsWith('http') ? matchUrl : C_TOP + matchUrl) });
     }
 
-    if ((action === 'stream' && streamUrl) || (action === 'resolve' && matchUrl)) {
-      const r = await resolveStream(streamUrl || matchUrl, title);
-      if (!r) return res.json({ success: false, error: 'Could not extract fid' });
+    if ((action === 'stream' && streamUrl) || (action === 'resolve')) {
+      const r = await resolve(streamUrl || matchUrl, title);
+      if (!r) return res.json({ success: false, error: 'No fid' });
       if (r.url) {
         const proto = req.headers['x-forwarded-proto'] || 'https';
         const host = req.headers.host || 'localhost:3000';
-        return res.json({
-          success: true,
-          stream: { url: `${proto}://${host}/api/crichd?action=proxy&url=${encodeURIComponent(r.url)}&referer=${encodeURIComponent(r.referer || 'https://teachtrendhub.com/')}` },
-          method: r.method,
-          directUrl: r.url,
-        });
+        return res.json({ success: true, stream: { url: `${proto}://${host}/api/crichd?action=proxy&url=${encodeURIComponent(r.url)}&referer=${encodeURIComponent(r.referer||'https://teachtrendhub.com/')}` }, method: r.method, directUrl: r.url });
       }
       return res.json({ success: false, fid: r.fid, v_con: r.v_con, v_dt: r.v_dt, method: r.method });
     }
 
     if (action === 'channels') {
-      const map = await buildChannelMap();
-      const channels = Object.entries(map).filter(([k, v]) => v.id).map(([k, v]) => ({ slug: k, name: v.name, channelId: v.id, url: zohanayaanUrl(v.id).url }));
-      return res.json({ success: true, channels, total: channels.length });
+      const map = await buildChMap();
+      const list = Object.entries(map).filter(([,v]) => v.c).map(([k,v]) => ({ fid: k, name: v.n, channelId: v.c }));
+      return res.json({ success: true, channels: list, total: list.length });
     }
 
-    if (action === 'srhady') {
-      const { text: je } = await fetch(`${S_LIVE}/Live_Events.json`);
-      const { text: m3u } = await fetch(`${S_LIVE}/playlist.m3u`);
-      return res.json({ success: true, events: JSON.parse(je).matches || [], playlist: m3u });
-    }
-
-    if (action === 'map') {
-      const map = await buildChannelMap();
-      return res.json({ success: true, map });
-    }
-
-    // Default: match list
     const matches = await scrapeMatches();
     return res.json({ success: true, matches, total: matches.length, fetchedAt: new Date().toISOString() });
   } catch (err) {
