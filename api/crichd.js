@@ -27,7 +27,7 @@ function fetch(url, opts = {}) {
         return fetch(res.headers.location, opts).then(resolve).catch(reject);
       const chunks = [];
       res.on('data', c => chunks.push(c));
-      res.on('end', () => resolve({ text: Buffer.concat(chunks).toString(), status: res.statusCode, headers: res.headers }));
+      res.on('end', () => resolve({ buf: Buffer.concat(chunks), text: () => Buffer.concat(chunks).toString(), status: res.statusCode, headers: res.headers }));
     });
     req.on('error', reject);
     req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
@@ -235,7 +235,7 @@ async function doProxy(url, referer) {
   if (ct.includes('mpegurl') || ct.includes('apple') || url.includes('.m3u8')) {
     const base = url.substring(0, url.lastIndexOf('/') + 1);
     const ref = referer || 'https://teachtrendhub.com/';
-    const body = resp.text.split('\n').map(line => {
+    const body = resp.text().split('\n').map(line => {
       const t = line.trim();
       if (t && !t.startsWith('#') && !t.startsWith('http'))
         return `/api/crichd?action=proxy&url=${encodeURIComponent(base + t)}&referer=${encodeURIComponent(ref)}`;
@@ -243,7 +243,7 @@ async function doProxy(url, referer) {
     }).join('\n');
     return { type: 'application/vnd.apple.mpegurl', body };
   }
-  return { type: ct || 'video/mp2t', body: resp.text };
+  return { type: ct || 'video/mp2t', body: resp.buf };
 }
 
 // ── Handler ──
