@@ -49,13 +49,13 @@ async function buildChMap() {
   if (cache.chMap && Date.now() - cache.tC < 120000) return cache.chMap;
   const m = {};
   try {
-    const { text: je } = await fetch(`${S_LIVE}/Live_Events.json`);
+    const je = (await fetch(`${S_LIVE}/Live_Events.json`)).text();
     for (const ev of (JSON.parse(je).matches || [])) {
       const fid = (ev.embed || '').match(/id=([^&]+)/);
       const cid = (ev.channel_id || '').match(/(\d+)/);
       if (fid && cid) m[fid[1]] = { n: ev.title || '', c: cid[1] };
     }
-    const { text: m3u } = await fetch(`${S_LIVE}/playlist.m3u`);
+    const m3u = (await fetch(`${S_LIVE}/playlist.m3u`)).text();
     let cur = {};
     for (const line of m3u.split('\n')) {
       const t = line.trim();
@@ -78,7 +78,7 @@ function zUrl(cid) {
 // ── Match scraping ──
 async function scrapeMatches() {
   if (cache.matches && Date.now() - cache.tM < TTL) return cache.matches;
-  const { text: html } = await fetch(C_TOP + '/');
+  const html = (await fetch(C_TOP + '/')).text();
   const matches = [];
   for (const row of html.split(/<tr[\s>]/)) {
     if (!row.includes('gametitle')) continue;
@@ -101,7 +101,7 @@ async function scrapeMatches() {
 
 // ── Server scraping ──
 async function scrapeServers(matchUrl) {
-  const { text: html } = await fetch(matchUrl);
+  const html = (await fetch(matchUrl)).text();
   const servers = [], seen = new Set();
   const add = (n, u) => { if (u && !seen.has(u)) { seen.add(u); servers.push({ name: n, url: u }); } };
   let m;
@@ -118,11 +118,11 @@ async function scrapeServers(matchUrl) {
 async function getFid(serverUrl) {
   let ifUrl = serverUrl;
   if (serverUrl.includes('dadocric.st')) {
-    const { text } = await fetch(serverUrl, { headers: { Referer: C_TOP + '/' } });
+    const text = (await fetch(serverUrl, { headers: { Referer: C_TOP + '/' } })).text();
     const m = text.match(/iframe[^>]+src=["'](https?:\/\/[^"']+)["']/i);
     if (m) ifUrl = m[1];
   }
-  const { text } = await fetch(ifUrl, { headers: { Referer: serverUrl } });
+  const text = (await fetch(ifUrl, { headers: { Referer: serverUrl } })).text();
   return {
     fid: (text.match(/fid="([^"]*)"/) || [])[1],
     v_con: (text.match(/v_con=["'](.*?)["']/) || [])[1] || '',
@@ -133,7 +133,7 @@ async function getFid(serverUrl) {
 // ── Method 1: executeandship premiumcr.php character array ──
 async function m1(fid) {
   try {
-    const { text } = await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${fid}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+    const text = (await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${fid}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 })).text();
     const url = extractChars(text);
     if (url && url.includes('.m3u8')) return { url, method: 'exship' };
   } catch {}
@@ -143,11 +143,11 @@ async function m1(fid) {
 // ── Method 2: streamcrichd -> executeandship chain ──
 async function m2() {
   try {
-    const { text } = await fetch(`https://streamcrichd.com/update/willowcricket.php`, { headers: { Referer: 'https://streamcrichd.com/' }, timeout: 10000 });
+    const text = (await fetch(`https://streamcrichd.com/update/willowcricket.php`, { headers: { Referer: 'https://streamcrichd.com/' }, timeout: 10000 })).text();
     const f2 = (text.match(/fid=(["\'])([^"\']+)\1/) || [])[2];
     if (f2) {
       await fetch(`https:${EX_SHIP}/premium.js`, { headers: { Referer: EX_SHIP + '/' }, timeout: 8000 }).catch(() => {});
-      const { text: pText } = await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${f2}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 });
+      const pText = (await fetch(`${EX_SHIP}/premiumcr.php?player=desktop&live=${f2}`, { headers: { Referer: EX_SHIP + '/' }, timeout: 10000 })).text();
       const url = extractChars(pText);
       if (url && url.includes('.m3u8')) return { url, method: 'streamcrichd' };
     }
@@ -158,7 +158,7 @@ async function m2() {
 // ── Method 3: pzo.php (CloudStream 3) ──
 async function m3(fid, v_con, v_dt) {
   try {
-    const { text } = await fetch(`${B_CAST}/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt||'123456'}`, { headers: { Referer: P_ADO + '/' }, timeout: 10000 });
+    const text = (await fetch(`${B_CAST}/pzo.php?v=${fid}&secure=${v_con}&expires=${v_dt||'123456'}`, { headers: { Referer: P_ADO + '/' }, timeout: 10000 })).text();
     const u = extractChars(text) || (text.match(/["'](https?:\/\/[^"']*?m3u8[^"']*?)["']/) || [])[1];
     if (u) return { url: u.replace(/\\\//g, '/'), method: 'pzo' };
   } catch {}
@@ -197,7 +197,7 @@ async function m6(title) {
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   for (const pre of ['', 'live-', 'stream-']) {
     try {
-      const { text } = await fetch(`https://raw.githubusercontent.com/srhady/CricketLive/main/${pre}${slug}.m3u8`, { timeout: 5000 });
+      const text = (await fetch(`https://raw.githubusercontent.com/srhady/CricketLive/main/${pre}${slug}.m3u8`, { timeout: 5000 })).text();
       if (text) {
         const fl = text.split('\n').find(l => l.trim() && !l.startsWith('#'));
         if (fl && fl.includes('.m3u8')) return { url: fl.trim(), referer: 'https://teachtrendhub.com/', method: 'cricket-live' };
